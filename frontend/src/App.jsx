@@ -4,8 +4,10 @@ import './App.css'
 const API_BASE_URL = 'http://localhost:8000'
 
 function App() {
+  const [activeTab, setActiveTab] = useState('recipe')
   const [query, setQuery] = useState('')
   const [recipe, setRecipe] = useState(null)
+  const [recipePlan, setRecipePlan] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
@@ -20,9 +22,11 @@ function App() {
     setLoading(true)
     setError(null)
     setRecipe(null)
+    setRecipePlan(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/generate-recipe`, {
+      const endpoint = activeTab === 'recipe' ? '/generate-recipe' : '/generate-recipe-plan'
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,12 +35,19 @@ function App() {
       })
       
       if (!response.ok) {
-        throw new Error('Failed to generate recipe')
+        throw new Error(`Failed to generate ${activeTab === 'recipe' ? 'recipe' : 'recipe plan'}`)
       }
 
       const data = await response.json()
-      const parsedRecipe = JSON.parse(data.recipe_json)
-      setRecipe(parsedRecipe)
+      console.log('Received data:', data)
+      
+      if (activeTab === 'recipe') {
+        // Recipe is now returned as an object, not a JSON string
+        setRecipe(data.recipe)
+      } else {
+        console.log('Setting recipe plan:', data.recipe_plan)
+        setRecipePlan(data.recipe_plan)
+      }
     } catch (err) {
       setError(err.message || 'An error occurred while generating the recipe')
     } finally {
@@ -52,18 +63,47 @@ function App() {
       </header>
 
       <main className="main">
+        <div className="tabs">
+          <button 
+            className={`tab ${activeTab === 'recipe' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('recipe')
+              setRecipe(null)
+              setRecipePlan(null)
+              setError(null)
+            }}
+          >
+            Generate Recipe
+          </button>
+          <button 
+            className={`tab ${activeTab === 'plan' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('plan')
+              setRecipe(null)
+              setRecipePlan(null)
+              setError(null)
+            }}
+          >
+            Generate Meal Plan
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="query-form">
           <div className="input-group">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="E.g., 'vegetarian pasta with tomatoes' or 'quick breakfast ideas'"
+              placeholder={
+                activeTab === 'recipe' 
+                  ? "E.g., 'vegetarian pasta with tomatoes' or 'quick breakfast ideas'"
+                  : "E.g., 'healthy meal plan for weight loss' or 'vegetarian weekly menu'"
+              }
               className="query-input"
               disabled={loading}
             />
             <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Recipe'}
+              {loading ? 'Generating...' : activeTab === 'recipe' ? 'Generate Recipe' : 'Generate Meal Plan'}
             </button>
           </div>
         </form>
@@ -131,6 +171,34 @@ function App() {
                   </li>
                 ))}
               </ol>
+            </div>
+          </div>
+        )}
+
+        {recipePlan && (
+          <div className="recipe-plan-container">
+            <div className="plan-header">
+              <h2>📅 Your Weekly Meal Plan</h2>
+              <p className="plan-count">{recipePlan.length} meals planned</p>
+            </div>
+            
+            <div className="plans-grid">
+              {recipePlan.map((plan, index) => (
+                <div key={index} className="plan-card">
+                  <div className="plan-day">
+                    <span className="day-emoji">📅</span>
+                    <span className="day-name">{plan.meal_day.charAt(0).toUpperCase() + plan.meal_day.slice(1)}</span>
+                  </div>
+                  <div className="plan-meal-type">
+                    <span className={`meal-badge ${plan.meal_type}`}>
+                      {plan.meal_type.charAt(0).toUpperCase() + plan.meal_type.slice(1)}
+                    </span>
+                  </div>
+                  <div className="plan-theme">
+                    <h3>{plan.recipe_title}</h3>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

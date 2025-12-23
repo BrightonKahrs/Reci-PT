@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Literal
+from models.planner_models import RecipePlanListModel
+from models.recipe_models import RecipeField
 
 class RecipeInputModel(BaseModel):
     """Input model for recipe generation"""
@@ -7,4 +9,5 @@ class RecipeInputModel(BaseModel):
 
 class RecipeOutputModel(BaseModel):
     """Output model for generated recipe"""
-    recipe_json: str = Field(..., description="Generated recipe in JSON format")
+    recipe: RecipeField = Field(..., description="Generated recipe")
+    

@@ -26,11 +26,14 @@ class RecipeAgent(BaseAgent):
     def __init__(self):
         super().__init__(agent_name="RecipeAgent")
         
-    async def generate_recipe(self, user_query: str) -> str:
+    async def generate_recipe(self, user_query: str) -> RecipeField:
         """Generates a recipe based on the user's natural language query
 
         Args:
-            user_query (str): The natural language query from the user."""
+            user_query (str): The natural language query from the user.
+            
+        Returns:
+            RecipeField: The validated recipe model."""
         
         self._ensure_client()
         
@@ -51,4 +54,5 @@ class RecipeAgent(BaseAgent):
 
         result = await agent.run(messages=messages)
         logger.info(f"Generated Recipe: {result.text}")
-        return result.text
+        # Parse the JSON response into Pydantic model
+        return RecipeField.model_validate_json(result.text)
