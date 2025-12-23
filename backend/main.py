@@ -9,9 +9,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from ai.agents.dax_agent import RecipeAgent
+from ai.agents.recipe_agent import RecipeAgent
 from models.response_models import RecipeInputModel, RecipeOutputModel
-from models.recipe_models import RecipeField
 
 # Configure logging
 logging.basicConfig(
@@ -29,8 +28,8 @@ logger = logging.getLogger(__name__)
 conversation_history = []
 
 app = FastAPI(
-    title="Power BI Embedded AI Backend",
-    description="Backend API for Power BI Embedded with AI Agent Chat capabilities",
+    title="Recipe AI Backend",
+    description="Backend API for Recipe AI with chat capabilities",
     version="1.0.0"
 )
 

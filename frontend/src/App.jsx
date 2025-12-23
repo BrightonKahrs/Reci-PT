@@ -86,6 +86,31 @@ function App() {
 
             <p className="recipe-description">{recipe.description}</p>
 
+            {recipe.nutritional_info && (
+              <div className="recipe-section nutrition-section">
+                <h3>Nutrition Information</h3>
+                <p className="servings-info">Per serving ({recipe.number_of_servings} servings total)</p>
+                <div className="nutrition-grid">
+                  <div className="nutrition-item">
+                    <span className="nutrition-label">Calories</span>
+                    <span className="nutrition-value">{recipe.nutritional_info.calories} kcal</span>
+                  </div>
+                  <div className="nutrition-item">
+                    <span className="nutrition-label">Protein</span>
+                    <span className="nutrition-value">{recipe.nutritional_info.protein}g</span>
+                  </div>
+                  <div className="nutrition-item">
+                    <span className="nutrition-label">Fat</span>
+                    <span className="nutrition-value">{recipe.nutritional_info.fat}g</span>
+                  </div>
+                  <div className="nutrition-item">
+                    <span className="nutrition-label">Carbs</span>
+                    <span className="nutrition-value">{recipe.nutritional_info.carbohydrates}g</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="recipe-section">
               <h3>Ingredients</h3>
               <ul className="ingredients-list">
