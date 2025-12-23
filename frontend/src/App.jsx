@@ -175,64 +175,59 @@ function App() {
           </div>
         )}
 
-        {recipePlan && (
+        {activeTab === 'plan' && (
           <div className="recipe-plan-container">
             <div className="plan-header">
               <h2>📅 Your Weekly Meal Plan</h2>
-              <p className="plan-count">{recipePlan.length} meals planned</p>
+              <p className="plan-count">{recipePlan ? `${recipePlan.length} meals planned` : 'Plan your week'}</p>
             </div>
             
-            <div className="plans-grid">
-              {recipePlan.map((plan, index) => {
-                // Handle meal_day as either string or array
-                const formatDay = (day) => day.charAt(0).toUpperCase() + day.slice(1)
-                const dayDisplay = Array.isArray(plan.meal_day) 
-                  ? plan.meal_day.map(formatDay).join(', ')
-                  : formatDay(plan.meal_day)
-                
-                return (
-                  <div key={index} className="plan-card">
-                    <div className="plan-day">
-                      <span className="day-emoji">📅</span>
-                      <span className="day-name">{dayDisplay}</span>
-                    </div>
-                    <div className="plan-meal-type">
-                      <span className={`meal-badge ${plan.meal_type}`}>
-                        {plan.meal_type.charAt(0).toUpperCase() + plan.meal_type.slice(1)}
-                      </span>
-                    </div>
-                    <div className="plan-theme">
-                      <h3>{plan.recipe_title}</h3>
-                    </div>
-                    {plan.servings && (
-                      <div className="plan-servings">
-                        <span className="servings-icon">🍽️</span>
-                        <span>{plan.servings} servings</span>
-                      </div>
-                    )}
-                    {plan.estimated_macros && (
-                      <div className="plan-macros">
-                        <div className="macro-item">
-                          <span className="macro-label">Cal</span>
-                          <span className="macro-value">{plan.estimated_macros.calories}</span>
-                        </div>
-                        <div className="macro-item">
-                          <span className="macro-label">P</span>
-                          <span className="macro-value">{plan.estimated_macros.protein}g</span>
-                        </div>
-                        <div className="macro-item">
-                          <span className="macro-label">F</span>
-                          <span className="macro-value">{plan.estimated_macros.fat}g</span>
-                        </div>
-                        <div className="macro-item">
-                          <span className="macro-label">C</span>
-                          <span className="macro-value">{plan.estimated_macros.carbohydrates}g</span>
-                        </div>
-                      </div>
-                    )}
+            <div className="weekly-grid">
+              <div className="weekly-grid-header">
+                <div className="meal-type-label"></div>
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                  <div key={day} className="day-header">{day}</div>
+                ))}
+              </div>
+              
+              {['breakfast', 'lunch', 'snack', 'dinner'].map(mealType => (
+                <div key={mealType} className="meal-row">
+                  <div className="meal-type-label">
+                    <span className={`meal-badge ${mealType}`}>
+                      {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+                    </span>
                   </div>
-                )
-              })}
+                  
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
+                    // Find matching plan for this day/meal combination
+                    const plan = recipePlan?.find(p => 
+                      p.meal_type === mealType && 
+                      (Array.isArray(p.meal_day) ? p.meal_day.includes(day) : p.meal_day === day)
+                    )
+                    
+                    return (
+                      <div key={`${day}-${mealType}`} className={`meal-cell ${plan ? 'filled' : 'empty'}`}>
+                        {plan ? (
+                          <>
+                            <div className="meal-title">{plan.recipe_title}</div>
+                            {plan.servings && (
+                              <div className="meal-servings">🍽️ {plan.servings}</div>
+                            )}
+                            {plan.estimated_macros && (
+                              <div className="meal-macros">
+                                <span>{plan.estimated_macros.calories} cal</span>
+                                <span>P: {plan.estimated_macros.protein}g</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="empty-placeholder">-</div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         )}
