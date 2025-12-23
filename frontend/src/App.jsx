@@ -183,22 +183,56 @@ function App() {
             </div>
             
             <div className="plans-grid">
-              {recipePlan.map((plan, index) => (
-                <div key={index} className="plan-card">
-                  <div className="plan-day">
-                    <span className="day-emoji">📅</span>
-                    <span className="day-name">{plan.meal_day.charAt(0).toUpperCase() + plan.meal_day.slice(1)}</span>
+              {recipePlan.map((plan, index) => {
+                // Handle meal_day as either string or array
+                const formatDay = (day) => day.charAt(0).toUpperCase() + day.slice(1)
+                const dayDisplay = Array.isArray(plan.meal_day) 
+                  ? plan.meal_day.map(formatDay).join(', ')
+                  : formatDay(plan.meal_day)
+                
+                return (
+                  <div key={index} className="plan-card">
+                    <div className="plan-day">
+                      <span className="day-emoji">📅</span>
+                      <span className="day-name">{dayDisplay}</span>
+                    </div>
+                    <div className="plan-meal-type">
+                      <span className={`meal-badge ${plan.meal_type}`}>
+                        {plan.meal_type.charAt(0).toUpperCase() + plan.meal_type.slice(1)}
+                      </span>
+                    </div>
+                    <div className="plan-theme">
+                      <h3>{plan.recipe_title}</h3>
+                    </div>
+                    {plan.servings && (
+                      <div className="plan-servings">
+                        <span className="servings-icon">🍽️</span>
+                        <span>{plan.servings} servings</span>
+                      </div>
+                    )}
+                    {plan.estimated_macros && (
+                      <div className="plan-macros">
+                        <div className="macro-item">
+                          <span className="macro-label">Cal</span>
+                          <span className="macro-value">{plan.estimated_macros.calories}</span>
+                        </div>
+                        <div className="macro-item">
+                          <span className="macro-label">P</span>
+                          <span className="macro-value">{plan.estimated_macros.protein}g</span>
+                        </div>
+                        <div className="macro-item">
+                          <span className="macro-label">F</span>
+                          <span className="macro-value">{plan.estimated_macros.fat}g</span>
+                        </div>
+                        <div className="macro-item">
+                          <span className="macro-label">C</span>
+                          <span className="macro-value">{plan.estimated_macros.carbohydrates}g</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="plan-meal-type">
-                    <span className={`meal-badge ${plan.meal_type}`}>
-                      {plan.meal_type.charAt(0).toUpperCase() + plan.meal_type.slice(1)}
-                    </span>
-                  </div>
-                  <div className="plan-theme">
-                    <h3>{plan.recipe_title}</h3>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         )}

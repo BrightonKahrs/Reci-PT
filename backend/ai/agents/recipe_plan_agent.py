@@ -19,85 +19,62 @@ system_instructions = f"""
     {RecipePlanListModel.model_json_schema()}
 
     Example 1:
-    User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday.
+    User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday for myself and my partner.
+    I also want to meal prep lunches for myself for every weekday, the meal prep should be high in protein and nutritionally dense.
     Response:
     {{
-        "plans": [
+        "recipe_plan": [
         {{
-            "recipe_theme": "zuchinni noodles with pesto",
+            "recipe_title": "zuchinni noodles with pesto",
             "meal_type": "dinner",
-            "meal_day": "monday"
+            "meal_day": ["monday"]
+            "servings": 2,
+            "estimated_macros": {{
+                "calories": 400,
+                "protein": 12.0,
+                "fat": 18.0,
+                "carbohydrates": 50.0
+            }}
         }},
         {{
-            "recipe_theme": "quinoa salad with roasted vegetables",
+            "recipe_title": "quinoa salad with roasted vegetables",
             "meal_type": "dinner",
-            "meal_day": "wednesday"
+            "meal_day": ["wednesday"],
+            "servings": 2,
+            "estimated_macros": {{
+                "calories": 450,
+                "protein": 15.0,
+                "fat": 14.0,
+                "carbohydrates": 60.0
+            }}
         }},
         {{
-            "recipe_theme": "stuffed bell peppers with black beans and corn",
+            "recipe_title": "stuffed bell peppers with black beans and corn",
             "meal_type": "dinner",
-            "meal_day": "friday"
+            "meal_day": ["friday"]
+            "servings": 2,
+            "estimated_macros": {{
+                "calories": 500,
+                "protein": 18.0,
+                "fat": 16.0,
+                "carbohydrates": 70.0
+            }}
+        }},
+        {{
+            "recipe_title": "chicken and quinoa bowl with beans",
+            "meal_type": "lunch",
+            "meal_day": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+            "servings": 5,
+            "estimated_macros": {{
+                "calories": 600,
+                "protein": 40.0,
+                "fat": 20.0,
+                "carbohydrates": 50.0
+            }}
         }}
         ]
     }}
 
-    Example 2:
-    User Prompt: I want to meal prep lunches this week and have a unique dinner every night
-    Response:
-        {{
-            "plans": [
-             {{
-                "recipe_theme": "chicken and quinoa bowel with beans",
-                "meal_type": "lunch",
-                "meal_day": "monday"
-             }},
-             {{
-                "recipe_theme": "grilled salmon with asparagus",
-                "meal_type": "dinner",
-                "meal_day": "monday"
-             }},
-             {{
-                "recipe_theme": "chicken and quinoa bowel with beans",
-                "meal_type": "lunch",
-                "meal_day": "tuesday"
-             }},
-             {{
-                "recipe_theme": "homemade sushi and miso soup",
-                "meal_type": "dinner",
-                "meal_day": "tuesday"
-             }},
-             {{
-                "recipe_theme": "chicken and quinoa bowel with beans",
-                "meal_type": "lunch",
-                "meal_day": "wednesday"
-             }},
-             {{
-                "recipe_theme": "chicken stir fry with vegetables and brown rice",
-                "meal_type": "dinner",
-                "meal_day": "wednesday"
-             }},
-             {{
-                "recipe_theme": "chicken and quinoa bowel with beans",
-                "meal_type": "lunch",
-                "meal_day": "thursday"
-             }},
-             {{
-                "recipe_theme": "zucchini noodles with beef meat tomato meat sauce",
-                "meal_type": "dinner",
-                "meal_day": "thursday"
-             }},
-             {{
-                "recipe_theme": "chicken and quinoa bowel with beans",
-                "meal_type": "lunch",
-                "meal_day": "friday"
-             }},
-             {{
-                "recipe_theme": "homemade burgers with sweet potato fries",
-                "meal_type": "dinner",
-                "meal_day": "friday"
-             }},
-            ]
-        }}
 """
 
 

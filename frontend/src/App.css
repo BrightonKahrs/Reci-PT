@@ -341,7 +341,47 @@
   font-size: 1.3rem;
   font-weight: 700;
   line-height: 1.4;
-  margin: 0;
+  margin: 0 0 1rem 0;
+}
+
+.plan-servings {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.servings-icon {
+  font-size: 1.1rem;
+}
+
+.plan-macros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.macro-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.macro-label {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.macro-value {
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {

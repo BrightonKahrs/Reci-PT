@@ -16,10 +16,10 @@ class InstructionField(BaseModel):
 class MacroNutritionField(BaseModel):
     """Represents nutritional information on a PER serving basis"""
     model_config = ConfigDict(extra='forbid')
-    calories: int = Field(..., description="Calories in kcal")
-    protein: float = Field(..., description="Protein in grams")
-    fat: float = Field(..., description="Fat in grams")
-    carbohydrates: float = Field(..., description="Carbohydrates in grams")
+    calories: int = Field(..., description="Calories in kcal per serving")
+    protein: float = Field(..., description="Protein in grams per serving")
+    fat: float = Field(..., description="Fat in grams per serving")
+    carbohydrates: float = Field(..., description="Carbohydrates in grams per serving")
 
 class RecipeField(BaseModel):
     """Represents a recipe"""
