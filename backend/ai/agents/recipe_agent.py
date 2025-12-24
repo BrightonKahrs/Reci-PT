@@ -40,19 +40,17 @@ class RecipeAgent(BaseAgent):
         if not self._client:
             raise RuntimeError("RecipeAgent not started. Call start() first.")
 
-        messages = [
-            ChatMessage(role="system", text=system_instructions),
-            ChatMessage(role="user", text=user_query),
-        ]
-
         agent = self._client.create_agent(
             id="RecipeAgent", 
-            tools=[], 
-            messages=messages,
+            system_instructions=system_instructions,
+            tools=[],
             response_format=RecipeField
         )
 
-        result = await agent.run(messages=messages)
+        if not self._thread:
+            self._thread = agent.get_new_thread()
+
+        result = await agent.run(user_query, thread=self._thread)
         logger.info(f"Generated Recipe: {result.text}")
         # Parse the JSON response into Pydantic model
         return RecipeField.model_validate_json(result.text)

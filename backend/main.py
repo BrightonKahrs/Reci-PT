@@ -27,8 +27,9 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-# In-memory conversation history (in production, use a database)
-conversation_history = []
+# AI Agents
+recipe_plan_agent = RecipePlanAgent()
+recipe_agent = RecipeAgent()
 
 app = FastAPI(
     title="Recipe AI Backend",
@@ -60,32 +61,30 @@ async def root():
 async def generate_recipe(request: RecipeInputModel) -> RecipeOutputModel:
     """Endpoint to generate a recipe based on user query"""
 
-    agent = RecipeAgent()
-    await agent.start()
+    await recipe_agent.start()
     try:
         # Agent returns validated Pydantic model directly
-        recipe = await agent.generate_recipe(user_query=request.query)
+        recipe = await recipe_agent.generate_recipe(user_query=request.query)
         return {"recipe": recipe}
     except Exception as e:
         logger.error(f"Error generating recipe: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate recipe")
     finally:
-        await agent.stop()
+        await recipe_agent.stop()
 
 @app.post("/generate-recipe-plan", response_model=RecipePlanListModel)
 async def generate_recipe_plan(request: RecipeInputModel) -> RecipePlanListModel:
     """Endpoint to generate a recipe plan based on user query"""
 
-    agent = RecipePlanAgent()
-    await agent.start()
+    await recipe_plan_agent.start()
     try:
         # Agent returns validated Pydantic model directly
-        return await agent.generate_recipe_plan(user_query=request.query)
+        return await recipe_plan_agent.generate_recipe_plan(user_query=request.query)
     except Exception as e:
         logger.error(f"Error generating recipe plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate recipe plan")
     finally:
-        await agent.stop()
+        await recipe_plan_agent.stop()
 
 
 if __name__ == "__main__":

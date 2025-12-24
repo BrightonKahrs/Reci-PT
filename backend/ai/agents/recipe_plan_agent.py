@@ -1,6 +1,6 @@
 import logging
 
-from agent_framework import ChatMessage
+from agent_framework import AgentThread, ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
@@ -14,6 +14,7 @@ system_instructions = f"""
     You are a Recipe Planner Agent that translates user prompts into an expected recipe plan.
 
     You MUST honor any dietary preferences specified by the user. 
+    Do NOT add more recipes than specifically requested by the user.
 
     The response MUST be in JSON format matching the RecipePlanListModel schema:
     {RecipePlanListModel.model_json_schema()}
@@ -64,7 +65,7 @@ system_instructions = f"""
             "recipe_title": "chicken and quinoa bowl with beans",
             "meal_type": "lunch",
             "meal_day": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-            "servings": 5,
+            "servings": 1,
             "estimated_macros": {{
                 "calories": 600,
                 "protein": 40.0,
@@ -86,6 +87,7 @@ class RecipePlanAgent(BaseAgent):
         
     async def generate_recipe_plan(self, user_query: str) -> RecipePlanListModel:
         """Generates a recipe plan based on the user's natural language query
+            If a thread is provided it will be used, otherwise it will generate a new thread.
 
         Args:
             user_query (str): The natural language query from the user.
@@ -98,19 +100,17 @@ class RecipePlanAgent(BaseAgent):
         if not self._client:
             raise RuntimeError("RecipePlanAgent not started. Call start() first.")
 
-        messages = [
-            ChatMessage(role="system", text=system_instructions),
-            ChatMessage(role="user", text=user_query),
-        ]
-
         agent = self._client.create_agent(
             id="RecipePlanAgent", 
-            tools=[], 
-            messages=messages,
+            system_instructions=system_instructions,
+            tools=[],
             response_format=RecipePlanListModel
         )
 
-        result = await agent.run(messages=messages)
+        if not self._thread:
+            self._thread = agent.get_new_thread()
+
+        result = await agent.run(user_query, thread=self._thread)
         logger.info(f"Generated Recipe Plan: {result.text}")
         # Parse the JSON response into Pydantic model
         return RecipePlanListModel.model_validate_json(result.text)

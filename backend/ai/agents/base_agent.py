@@ -3,6 +3,7 @@ import logging
 from abc import ABC
 
 from agent_framework.azure import AzureAIClient
+from agent_framework import AgentThread
 from azure.identity.aio import DefaultAzureCredential
 
 from ai.ai_config import config
@@ -26,6 +27,7 @@ class BaseAgent(ABC):
         self._deployment_name = config.azure_ai_model_deployment_name
         self._credential: Optional[DefaultAzureCredential] = None
         self._client: Optional[AzureAIClient] = None
+        self._thread: Optional[AgentThread] = None
         
         if not self._endpoint:
             logger.error(f"AZURE_AI_PROJECT_ENDPOINT is not set. Cannot initialize {agent_name}.")
