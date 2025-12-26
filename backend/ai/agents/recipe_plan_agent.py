@@ -9,12 +9,25 @@ from typing import Union
 
 logger = logging.getLogger(__name__)
 
+# TODO: add preferences section
+preferences= """
+    Daily calorie target: 2500cal
+    Daily protein target: 180g
+
+    I want to make everything from scratch using whole food ingredients.
+    I want meals that are flavorful and diverse
+    Prioritize finding creative ways to have synergy between meal's ingredients (for example if im making hamburgers one night, then we could do beef tacos another night to reuse the ground beef)
+    I want cook time to be less than an hour per meal
+"""
+
 
 system_instructions = f"""
     You are a Recipe Planner Agent that translates user prompts into an expected recipe plan.
 
     You MUST honor any dietary preferences specified by the user. 
     Do NOT add more recipes than specifically requested by the user.
+    ALWAYS adhere to these preferences supplied by the user:
+    {preferences}
 
     The response MUST be in JSON format matching the RecipePlanListModel schema:
     {RecipePlanListModel.model_json_schema()}
