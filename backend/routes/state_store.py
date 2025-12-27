@@ -16,30 +16,39 @@ state_store: StateStore= LocalStateStore()
 
 
 @router.post("/save-recipe")
-async def save_recipe(request: RecipeOutputModel) -> dict:
-    """Endpoint to save a generated recipe to the state store"""
+async def save_recipe(request: RecipeOutputModel, recipe_key: str = None) -> dict:
+    """Endpoint to save a generated recipe to the state store
+    
+    If recipe_key is provided, updates the existing recipe.
+    Otherwise, creates a new recipe with a generated GUID.
+    """
     
     try:
-        # Generate a unique GUID key for the recipe
-        recipe_key = f"recipe:{uuid.uuid4()}"
+        # Use provided key or generate a new one
+        if recipe_key:
+            key = recipe_key
+            action = "updated"
+        else:
+            key = f"recipe:{uuid.uuid4()}"
+            action = "saved"
         
-        # Convert Pydantic model to dict for storageS
+        # Convert Pydantic model to dict for storage
         recipe_data = request.recipe.model_dump()
         
         # Save to state store
-        await state_store.set(recipe_key, recipe_data)
+        await state_store.set(key, recipe_data)
         
-        logger.info(f"Saved recipe: {recipe_key}")
+        logger.info(f"{action.capitalize()} recipe: {key}")
         
         return {
             "status": "success",
-            "message": f"Recipe '{request.recipe.title}' saved successfully",
-            "key": recipe_key
+            "message": f"Recipe '{request.recipe.title}' {action} successfully",
+            "key": key
         }
     except Exception as e:
         logger.error(f"Error saving recipe: {e}")
         raise HTTPException(status_code=500, detail="Failed to save recipe")
-    
+
 
 @router.get("/get-recipe/{recipe_key}")
 async def get_recipe(recipe_key: str) -> RecipeOutputModel:
