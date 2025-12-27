@@ -4,7 +4,7 @@ from agent_framework import AgentThread, ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
-from models.planner_models import RecipePlanListModel
+from backend.models.meal_plan_models import RecipePlanListModel
 from typing import Union
 
 logger = logging.getLogger(__name__)

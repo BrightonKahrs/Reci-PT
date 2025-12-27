@@ -4,7 +4,7 @@ import logging
 from ai.agents.recipe_plan_agent import RecipePlanAgent
 from ai.agents.recipe_agent import RecipeAgent
 from models.response_models import RecipeInputModel, RecipeOutputModel
-from models.planner_models import RecipePlanListModel
+from backend.models.meal_plan_models import RecipePlanListModel
 
 
 logger = logging.getLogger(__name__)
