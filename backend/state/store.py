@@ -10,7 +10,7 @@ class StateStore(ABC):
     async def set(self, key: str, value: dict) -> None:
         ...
     @abstractmethod
-    async def delete(self, key: str) -> None:
+    async def delete(self, key: str) -> bool:
         ...
 
     @abstractmethod

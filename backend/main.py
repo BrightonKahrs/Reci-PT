@@ -1,6 +1,3 @@
-"""
-FastAPI Backend for Power BI Embedded with AI Agent Chat
-"""
 import logging
 
 from fastapi.middleware.cors import CORSMiddleware

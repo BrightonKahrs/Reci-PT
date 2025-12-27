@@ -64,3 +64,46 @@ async def get_recipe(recipe_key: str) -> RecipeOutputModel:
     except Exception as e:
         logger.error(f"Error retrieving recipe: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve recipe")
+    
+    
+@router.delete("/delete-recipe/{recipe_key}")
+async def delete_recipe(recipe_key: str) -> dict:
+    """Endpoint to delete a saved recipe from the state store"""
+    
+    try:
+        # Delete from state store
+        deleted = await state_store.delete(recipe_key)
+        
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Recipe not found")
+        
+        logger.info(f"Deleted recipe: {recipe_key}")
+        
+        return {
+            "status": "success",
+            "message": f"Recipe with key '{recipe_key}' deleted successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting recipe: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete recipe")
+    
+
+@router.get("/list-recipes")
+async def list_recipes() -> dict:
+    """Endpoint to list all saved recipe keys in the state store"""
+    
+    try:
+        # List all recipe keys
+        recipe_keys = await state_store.list(prefix="recipe:")
+        
+        logger.info(f"Listed {len(recipe_keys)} recipes")
+        
+        return {
+            "status": "success",
+            "recipe_keys": recipe_keys
+        }
+    except Exception as e:
+        logger.error(f"Error listing recipes: {e}")
+        raise HTTPException(status_code=500, detail="Failed to list recipes")
