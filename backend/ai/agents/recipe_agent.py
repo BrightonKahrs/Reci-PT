@@ -37,7 +37,7 @@ class RecipeAgent(BaseAgent):
 
         agent = self._client.create_agent(
             id="RecipeAgent", 
-            system_instructions=system_instructions,
+            instructions=system_instructions,
             tools=[],
             response_format=Recipe
         )

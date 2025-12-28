@@ -37,8 +37,8 @@ class MealPlanAgent(BaseAgent):
         system_instructions = self._build_system_instructions(preferences)
 
         agent = self._client.create_agent(
-            id="RecipePlanAgent", 
-            system_instructions=system_instructions,
+            id="MealPlanAgent", 
+            instructions=system_instructions,
             tools=[],
             response_format=MealPlan
         )
