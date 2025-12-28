@@ -89,13 +89,23 @@ class BaseAgent(ABC):
         return '\n'.join(prefs) if prefs else "No dietary restrictions."
     
     @abstractmethod
-    def _build_system_instructions(self, preferences: str) -> str:
-        """Build system instructions with user preferences.
+    def _build_system_instructions(self) -> str:
+        """Build static system instructions for the agent.
         
-        Args:
-            preferences: Formatted user preferences string
-            
         Returns:
             str: Complete system instructions for the agent
+        """
+        ...
+
+    @abstractmethod
+    def _build_user_message(self, user_query: str, preferences: str) -> str:
+        """Build user message with preferences context.
+        
+        Args:
+            user_query (str): The natural language query from the user.
+            preferences (str): Formatted user preferences.
+        
+        Returns:
+            str: Complete user message for the agent
         """
         ...

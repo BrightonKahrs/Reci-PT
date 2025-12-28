@@ -30,15 +30,19 @@ class MealPlanAgent(BaseAgent):
         self._ensure_client()
         
         if not self._client:
-            raise RuntimeError("RecipePlanAgent not started. Call start() first.")
+            raise RuntimeError("MealPlanAgent not started. Call start() first.")
 
-        # Load user preferences and build system instructions
+        # Load user preferences to include in the message
         preferences = await self._load_user_preferences()
-        system_instructions = self._build_system_instructions(preferences)
+        
+        # Build user message with preferences context
+        user_message = self._build_user_message(user_query, preferences)
+        logger.info(f"User message with preferences: {user_message}")
 
+        # Create agent with static system instructions (reusable)
         agent = self._client.create_agent(
             id="MealPlanAgent", 
-            instructions=system_instructions,
+            instructions=self._build_system_instructions(),
             tools=[],
             response_format=MealPlan
         )
@@ -46,79 +50,82 @@ class MealPlanAgent(BaseAgent):
         if not self._thread:
             self._thread = agent.get_new_thread()
 
-        result = await agent.run(user_query, thread=self._thread)
-        logger.info(f"Generated Recipe Plan: {result.text}")
+        result = await agent.run(user_message, thread=self._thread)
+        logger.info(f"Generated Meal Plan: {result.text}")
         # Parse the JSON response into Pydantic model
         return MealPlan.model_validate_json(result.text)
     
-    def _build_system_instructions(self, preferences: str) -> str:
-        """Build system instructions with user preferences"""
-        return f"""
-            You are a Meal Plan Agent that translates user prompts into an expected recipe plan.
-
-            User Preferences:
+    def _build_user_message(self, user_query: str, preferences: str) -> str:
+        """Build user message with preferences context"""
+        
+        return f"""## MY PREFERENCES
             {preferences}
 
-            You MUST honor any dietary preferences specified by the user.
-            Do NOT add more recipes than specifically requested by the user.
+            ## MY REQUEST
+            {user_query}"""
 
-            The response MUST be in JSON format matching the MealPlan schema:
+    def _build_system_instructions(self) -> str:
+        """Build static system instructions"""
+
+        return f"""You are a Meal Plan Agent that translates user prompts into meal plans.
+
+            ## CRITICAL DIETARY RESTRICTIONS - MUST FOLLOW
+            Each user message will include their dietary preferences. You MUST honor them.
+
+            ## STRICT RULES
+            1. REQUIRED restrictions are NON-NEGOTIABLE. You MUST NOT include ANY ingredients that violate them.
+            2. If a user asks for a dish that traditionally contains forbidden ingredients, you MUST create a compliant alternative version.
+            3. For "vegetarian": NO meat, poultry, fish, or seafood. Use plant-based proteins.
+            4. For "no dairy": NO milk, cheese, butter, cream, yogurt, or any dairy derivatives.
+            5. Do NOT add more recipes than specifically requested by the user.
+            6. ALWAYS adapt recipes to meet dietary requirements.
+
+            ## RESPONSE FORMAT
+            Respond ONLY with valid JSON matching this schema:
             {MealPlan.model_json_schema()}
 
-            Example 1:
-            User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday
-            
-            Model Output (This should be the full, correct JSON):
+            ## EXAMPLE
+            User Request: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday
+
+            Response:
             {{
                 "recipe_plan": [
-                {{
-                    "recipe_title": "zuchinni noodles with pesto",
-                    "meal_type": "dinner",
-                    "meal_day": ["monday"],
-                    "servings": 2,
-                    "estimated_macros": {{
-                        "calories": 400,
-                        "protein": 12.0,
-                        "fat": 18.0,
-                        "carbohydrates": 50.0
+                    {{
+                        "recipe_title": "zucchini noodles with pesto",
+                        "meal_type": "dinner",
+                        "meal_day": ["monday"],
+                        "servings": 2,
+                        "estimated_macros": {{
+                            "calories": 400,
+                            "protein": 12.0,
+                            "fat": 18.0,
+                            "carbohydrates": 50.0
+                        }}
+                    }},
+                    {{
+                        "recipe_title": "quinoa salad with roasted vegetables",
+                        "meal_type": "dinner",
+                        "meal_day": ["wednesday"],
+                        "servings": 2,
+                        "estimated_macros": {{
+                            "calories": 450,
+                            "protein": 15.0,
+                            "fat": 14.0,
+                            "carbohydrates": 60.0
+                        }}
+                    }},
+                    {{
+                        "recipe_title": "stuffed bell peppers with black beans",
+                        "meal_type": "dinner",
+                        "meal_day": ["friday"],
+                        "servings": 2,
+                        "estimated_macros": {{
+                            "calories": 500,
+                            "protein": 18.0,
+                            "fat": 16.0,
+                            "carbohydrates": 70.0
+                        }}
                     }}
-                }},
-                {{
-                    "recipe_title": "quinoa salad with roasted vegetables",
-                    "meal_type": "dinner",
-                    "meal_day": ["wednesday"],
-                    "servings": 2,
-                    "estimated_macros": {{
-                        "calories": 450,
-                        "protein": 15.0,
-                        "fat": 14.0,
-                        "carbohydrates": 60.0
-                    }}
-                }},
-                {{
-                    "recipe_title": "stuffed bell peppers with black beans and corn",
-                    "meal_type": "dinner",
-                    "meal_day": ["friday"],
-                    "servings": 2,
-                    "estimated_macros": {{
-                        "calories": 500,
-                        "protein": 18.0,
-                        "fat": 16.0,
-                        "carbohydrates": 70.0
-                    }}
-                }},
-                {{
-                    "recipe_title": "chicken and quinoa bowl with beans",
-                    "meal_type": "lunch",
-                    "meal_day": ["monday", "tuesday", "wednesday", "thursday", "friday"],
-                    "servings": 1,
-                    "estimated_macros": {{
-                        "calories": 600,
-                        "protein": 40.0,
-                        "fat": 20.0,
-                        "carbohydrates": 50.0
-                    }}
-                }}
                 ]
             }}
-        """
+            """

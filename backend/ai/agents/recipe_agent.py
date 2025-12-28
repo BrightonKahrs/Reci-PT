@@ -30,14 +30,17 @@ class RecipeAgent(BaseAgent):
         if not self._client:
             raise RuntimeError("RecipeAgent not started. Call start() first.")
 
-        # Load user preferences and build system instructions
+        # Load user preferences to include in the message
         preferences = await self._load_user_preferences()
-        system_instructions = self._build_system_instructions(preferences)
-        logger.info(f"System Instructions: {system_instructions}")
+        
+        # Build user message with preferences context
+        user_message = self._build_user_message(user_query, preferences)
+        logger.info(f"User message with preferences: {user_message}")
 
+        # Create agent with static system instructions (reusable)
         agent = self._client.create_agent(
             id="RecipeAgent", 
-            instructions=system_instructions,
+            instructions=self._build_system_instructions(),
             tools=[],
             response_format=Recipe
         )
@@ -45,18 +48,27 @@ class RecipeAgent(BaseAgent):
         if not self._thread:
             self._thread = agent.get_new_thread()
 
-        result = await agent.run(user_query, thread=self._thread)
+        result = await agent.run(user_message, thread=self._thread)
         logger.info(f"Generated Recipe: {result.text}")
         # Parse the JSON response into Pydantic model
         return Recipe.model_validate_json(result.text)
     
-    def _build_system_instructions(self, preferences: str) -> str:
-        """Build system instructions with user preferences"""
+    def _build_user_message(self, user_query: str, preferences: str) -> str:
+        """Build user message with preferences context"""
+
+        return f"""## MY DIETARY PREFERENCES
+            {preferences}
+
+            ## MY REQUEST
+            {user_query}"""
+
+    def _build_system_instructions(self) -> str:
+        """Build static system instructions"""
         
         return f"""You are a Recipe Agent that translates user prompts into recipes.
 
             ## CRITICAL DIETARY RESTRICTIONS - MUST FOLLOW
-            {preferences}
+            Each user message will include their dietary preferences. You MUST honor them.
 
             ## STRICT RULES
             1. REQUIRED restrictions are NON-NEGOTIABLE. You MUST NOT include ANY ingredients that violate them.
