@@ -15,8 +15,7 @@ class MealPlanAgent(BaseAgent):
     """Agent that specializes in generating meal plans."""
 
     def __init__(self, state_store: StateStore):
-        super().__init__(agent_name="MealPlanAgent")
-        self.state_store = state_store
+        super().__init__(agent_name="MealPlanAgent", state_store=state_store)
         
     async def generate_recipe_plan(self, user_query: str, user_id: str = "default") -> MealPlan:
         """Generates a recipe plan based on the user's natural language query

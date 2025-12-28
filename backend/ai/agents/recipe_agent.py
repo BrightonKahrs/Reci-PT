@@ -5,6 +5,7 @@ from agent_framework import ChatMessage
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
 from backend.models.recipe import Recipe
+from state.store import StateStore
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +22,10 @@ system_instructions = f"""
 
 
 class RecipeAgent(BaseAgent):
-    """Agent that specializes in translating natural language to DAX queries."""
+    """Agent that specializes in translating natural language to recipes."""
 
-    def __init__(self):
-        super().__init__(agent_name="RecipeAgent")
+    def __init__(self, state_store: StateStore):
+        super().__init__(agent_name="RecipeAgent", state_store=state_store)
         
     async def generate_recipe(self, user_query: str) -> Recipe:
         """Generates a recipe based on the user's natural language query

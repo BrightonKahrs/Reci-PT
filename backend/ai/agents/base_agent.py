@@ -7,6 +7,7 @@ from agent_framework import AgentThread
 from azure.identity.aio import DefaultAzureCredential
 
 from ai.ai_config import config
+from state.store import StateStore
 
 
 logger = logging.getLogger(__name__)
@@ -15,14 +16,16 @@ logger = logging.getLogger(__name__)
 class BaseAgent(ABC):
     """Abstract base class for AI agents with shared Azure AI client setup."""
 
-    def __init__(self, agent_name: str):
+    def __init__(self, agent_name: str, state_store: StateStore):
         """
         Initialize the base agent.
         
         Args:
             agent_name: Name of the agent (used for logging and client identification)
+            state_store: State store instance for accessing application state
         """
         self._agent_name = agent_name
+        self.state_store = state_store
         self._endpoint = config.azure_ai_project_endpoint
         self._deployment_name = config.azure_ai_model_deployment_name
         self._credential: Optional[DefaultAzureCredential] = None

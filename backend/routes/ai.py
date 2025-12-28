@@ -17,7 +17,7 @@ router = APIRouter(prefix="/ai", tags=["AI Endpoints"])
 async def generate_recipe(request: RecipeInput, state_store: StateStore = Depends()) -> RecipeOutput:
     """Endpoint to generate a recipe based on user query"""
 
-    recipe_agent = RecipeAgent()
+    recipe_agent = RecipeAgent(state_store=state_store)
     await recipe_agent.start()
     try:
         # Agent returns validated Pydantic model directly
