@@ -15,7 +15,7 @@ router = APIRouter(prefix="/recipe", tags=["Recipe Endpoints"])
 state_store: StateStore= LocalStateStore()
 
 
-@router.post("/save-recipe")
+@router.post("/save")
 async def save_recipe(request: RecipeOutput, recipe_key: str = None) -> dict:
     """Endpoint to save a generated recipe to the state store
     
@@ -50,7 +50,7 @@ async def save_recipe(request: RecipeOutput, recipe_key: str = None) -> dict:
         raise HTTPException(status_code=500, detail="Failed to save recipe")
 
 
-@router.get("/get-recipe/{recipe_key}")
+@router.get("/{recipe_key}")
 async def get_recipe(recipe_key: str) -> RecipeOutput:
     """Endpoint to retrieve a saved recipe from the state store"""
     
@@ -75,7 +75,7 @@ async def get_recipe(recipe_key: str) -> RecipeOutput:
         raise HTTPException(status_code=500, detail="Failed to retrieve recipe")
     
     
-@router.delete("/delete-recipe/{recipe_key}")
+@router.delete("/{recipe_key}")
 async def delete_recipe(recipe_key: str) -> dict:
     """Endpoint to delete a saved recipe from the state store"""
     
@@ -99,7 +99,7 @@ async def delete_recipe(recipe_key: str) -> dict:
         raise HTTPException(status_code=500, detail="Failed to delete recipe")
     
 
-@router.get("/list-recipes")
+@router.get("/")
 async def list_recipes() -> dict:
     """Endpoint to list all saved recipe keys in the state store"""
     
