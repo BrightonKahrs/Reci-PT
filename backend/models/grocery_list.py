@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List
 
-from models.recipe_models import IngredientField
+from backend.models.recipe import IngredientField
 
 
 class GroceryListField(BaseModel):

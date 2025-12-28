@@ -2,10 +2,10 @@ from fastapi import HTTPException, APIRouter
 import logging
 import uuid
 
-from models.response_models import RecipeOutputModel
+from backend.models.response import RecipeOutputModel
 
 from state.store import StateStore
-from state.local_state_store import LocalStateStore
+from backend.state.local_store import LocalStateStore
 
 
 logger = logging.getLogger(__name__)
