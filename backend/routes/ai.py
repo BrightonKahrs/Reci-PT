@@ -3,8 +3,8 @@ import logging
 
 from ai.agents.recipe_plan_agent import RecipePlanAgent
 from ai.agents.recipe_agent import RecipeAgent
-from backend.models.response import RecipeInputModel, RecipeOutputModel
-from backend.models.meal_plan import RecipePlanListModel
+from backend.models.response import RecipeInput, RecipeOutput
+from backend.models.meal_plan import MealPlan
 
 
 logger = logging.getLogger(__name__)
@@ -15,8 +15,8 @@ recipe_plan_agent = RecipePlanAgent()
 recipe_agent = RecipeAgent()
 
 
-@router.post("/generate-recipe", response_model=RecipeOutputModel)
-async def generate_recipe(request: RecipeInputModel) -> RecipeOutputModel:
+@router.post("/generate-recipe", response_model=RecipeOutput)
+async def generate_recipe(request: RecipeInput) -> RecipeOutput:
     """Endpoint to generate a recipe based on user query"""
 
     await recipe_agent.start()
@@ -31,8 +31,8 @@ async def generate_recipe(request: RecipeInputModel) -> RecipeOutputModel:
         await recipe_agent.stop()
 
 
-@router.post("/generate-recipe-plan", response_model=RecipePlanListModel)
-async def generate_recipe_plan(request: RecipeInputModel) -> RecipePlanListModel:
+@router.post("/generate-recipe-plan", response_model=MealPlan)
+async def generate_recipe_plan(request: RecipeInput) -> MealPlan:
     """Endpoint to generate a recipe plan based on user query"""
 
     await recipe_plan_agent.start()

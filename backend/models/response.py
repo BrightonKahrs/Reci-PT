@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
-from backend.models.recipe import RecipeField
+from backend.models.recipe import Recipe
 
 
-class RecipeInputModel(BaseModel):
+class RecipeInput(BaseModel):
     """Input model for recipe generation"""
     query: str = Field(..., description="User query for recipe generation")
 
-class RecipeOutputModel(BaseModel):
+
+class RecipeOutput(BaseModel):
     """Output model for generated recipe"""
-    recipe: RecipeField = Field(..., description="Generated recipe")
-    
+    recipe: Recipe = Field(..., description="Generated recipe")

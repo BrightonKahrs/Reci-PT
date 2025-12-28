@@ -2,7 +2,7 @@ from fastapi import HTTPException, APIRouter
 import logging
 import uuid
 
-from backend.models.response import RecipeOutputModel
+from backend.models.response import RecipeOutput
 
 from state.store import StateStore
 from backend.state.local_store import LocalStateStore
@@ -10,13 +10,13 @@ from backend.state.local_store import LocalStateStore
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/state", tags=["State Endpoints"])
+router = APIRouter(prefix="/recipe", tags=["Recipe Endpoints"])
 
 state_store: StateStore= LocalStateStore()
 
 
 @router.post("/save-recipe")
-async def save_recipe(request: RecipeOutputModel, recipe_key: str = None) -> dict:
+async def save_recipe(request: RecipeOutput, recipe_key: str = None) -> dict:
     """Endpoint to save a generated recipe to the state store
     
     If recipe_key is provided, updates the existing recipe.
@@ -51,7 +51,7 @@ async def save_recipe(request: RecipeOutputModel, recipe_key: str = None) -> dic
 
 
 @router.get("/get-recipe/{recipe_key}")
-async def get_recipe(recipe_key: str) -> RecipeOutputModel:
+async def get_recipe(recipe_key: str) -> RecipeOutput:
     """Endpoint to retrieve a saved recipe from the state store"""
     
     try:
@@ -63,7 +63,7 @@ async def get_recipe(recipe_key: str) -> RecipeOutputModel:
         
         # Wrap in the expected structure
         wrapped_data = {"recipe": recipe_data}
-        recipe_model = RecipeOutputModel.model_validate(wrapped_data)
+        recipe_model = RecipeOutput.model_validate(wrapped_data)
         
         logger.info(f"Retrieved recipe: {recipe_key}")
         

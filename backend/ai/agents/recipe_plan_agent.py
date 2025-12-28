@@ -4,7 +4,7 @@ from agent_framework import AgentThread, ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
-from backend.models.meal_plan_models import RecipePlanListModel
+from backend.models.meal_plan import MealPlan
 from typing import Union
 
 logger = logging.getLogger(__name__)
@@ -29,8 +29,8 @@ system_instructions = f"""
     ALWAYS adhere to these preferences supplied by the user:
     {preferences}
 
-    The response MUST be in JSON format matching the RecipePlanListModel schema:
-    {RecipePlanListModel.model_json_schema()}
+    The response MUST be in JSON format matching the MealPlan schema:
+    {MealPlan.model_json_schema()}
 
     Example 1:
     User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday for myself and my partner.
@@ -98,7 +98,7 @@ class RecipePlanAgent(BaseAgent):
     def __init__(self):
         super().__init__(agent_name="RecipePlanAgent")
         
-    async def generate_recipe_plan(self, user_query: str) -> RecipePlanListModel:
+    async def generate_recipe_plan(self, user_query: str) -> MealPlan:
         """Generates a recipe plan based on the user's natural language query
             If a thread is provided it will be used, otherwise it will generate a new thread.
 
@@ -106,7 +106,7 @@ class RecipePlanAgent(BaseAgent):
             user_query (str): The natural language query from the user.
             
         Returns:
-            RecipePlanListModel: The validated recipe plan model."""
+            MealPlan: The validated recipe plan model."""
         
         self._ensure_client()
         
@@ -117,7 +117,7 @@ class RecipePlanAgent(BaseAgent):
             id="RecipePlanAgent", 
             system_instructions=system_instructions,
             tools=[],
-            response_format=RecipePlanListModel
+            response_format=MealPlan
         )
 
         if not self._thread:
@@ -126,4 +126,4 @@ class RecipePlanAgent(BaseAgent):
         result = await agent.run(user_query, thread=self._thread)
         logger.info(f"Generated Recipe Plan: {result.text}")
         # Parse the JSON response into Pydantic model
-        return RecipePlanListModel.model_validate_json(result.text)
+        return MealPlan.model_validate_json(result.text)

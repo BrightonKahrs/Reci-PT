@@ -1,10 +1,10 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List
 
-from backend.models.recipe import IngredientField
+from backend.models.recipe import Ingredient
 
 
-class GroceryListField(BaseModel):
+class GroceryList(BaseModel):
     """Represents a grocery list"""
     model_config = ConfigDict(extra='forbid')
-    items: List[IngredientField]
+    items: List[Ingredient]

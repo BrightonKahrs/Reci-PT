@@ -4,7 +4,7 @@ from agent_framework import ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
-from models.recipe_models import RecipeField
+from backend.models.recipe import Recipe
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +15,8 @@ system_instructions = f"""
     You MUST honor any dietary preferences specified by the user. 
     Keep all recipes within the specified complexity level.
 
-    The response MUST be in JSON format matching the RecipeField schema:
-    {RecipeField.model_json_schema()}
+    The response MUST be in JSON format matching the Recipe schema:
+    {Recipe.model_json_schema()}
 """
 
 
@@ -26,14 +26,14 @@ class RecipeAgent(BaseAgent):
     def __init__(self):
         super().__init__(agent_name="RecipeAgent")
         
-    async def generate_recipe(self, user_query: str) -> RecipeField:
+    async def generate_recipe(self, user_query: str) -> Recipe:
         """Generates a recipe based on the user's natural language query
 
         Args:
             user_query (str): The natural language query from the user.
             
         Returns:
-            RecipeField: The validated recipe model."""
+            Recipe: The validated recipe model."""
         
         self._ensure_client()
         
@@ -44,7 +44,7 @@ class RecipeAgent(BaseAgent):
             id="RecipeAgent", 
             system_instructions=system_instructions,
             tools=[],
-            response_format=RecipeField
+            response_format=Recipe
         )
 
         if not self._thread:
@@ -53,4 +53,4 @@ class RecipeAgent(BaseAgent):
         result = await agent.run(user_query, thread=self._thread)
         logger.info(f"Generated Recipe: {result.text}")
         # Parse the JSON response into Pydantic model
-        return RecipeField.model_validate_json(result.text)
+        return Recipe.model_validate_json(result.text)
