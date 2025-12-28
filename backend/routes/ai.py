@@ -31,17 +31,17 @@ async def generate_recipe(request: RecipeInput, state_store: StateStore = Depend
         await recipe_agent.stop()
 
 
-@router.post("/generate-recipe-plan", response_model=MealPlan)
-async def generate_recipe_plan(request: RecipeInput, state_store: StateStore = Depends(get_state_store)) -> MealPlan:
-    """Endpoint to generate a recipe plan based on user query"""
+@router.post("/generate-meal-plan", response_model=MealPlan)
+async def generate_meal_plan(request: RecipeInput, state_store: StateStore = Depends(get_state_store)) -> MealPlan:
+    """Endpoint to generate a meal plan based on user query"""
 
     meal_plan_agent = MealPlanAgent(state_store=state_store)
     await meal_plan_agent.start()
     try:
         # Agent returns validated Pydantic model directly
-        return await meal_plan_agent.generate_recipe_plan(user_query=request.query)
+        return await meal_plan_agent.generate_meal_plan(user_query=request.query)
     except Exception as e:
-        logger.error(f"Error generating recipe plan: {e}")
-        raise HTTPException(status_code=500, detail="Failed to generate recipe plan")
+        logger.error(f"Error generating meal plan: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate meal plan")
     finally:
         await meal_plan_agent.stop()

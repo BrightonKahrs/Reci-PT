@@ -1,6 +1,6 @@
 from typing import Optional
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from agent_framework.azure import AzureAIClient
 from agent_framework import AgentThread
@@ -61,3 +61,41 @@ class BaseAgent(ABC):
         """Ensure client is initialized before use."""
         if not self._client:
             raise RuntimeError(f"{self._agent_name} not started. Call start() first.")
+    
+    async def _load_user_preferences(self) -> str:
+        """Load user preferences from state store"""
+        user_settings = await self.state_store.get("user_settings")
+        
+        if not user_settings:
+            return "No specific dietary preferences set."
+        
+        return self._format_preferences(user_settings)
+    
+    def _format_preferences(self, settings: dict) -> str:
+        """Format user settings into preference string"""
+        user_settings_list = settings.get('user_settings', [])
+        
+        required = [s['dietary_preference'] for s in user_settings_list 
+                   if s.get('order_of_importance') == 'Required']
+        preferred = [s['dietary_preference'] for s in user_settings_list 
+                    if s.get('order_of_importance') == 'Preferred']
+        
+        prefs = []
+        if required:
+            prefs.append(f"REQUIRED dietary restrictions: {', '.join(required)}")
+        if preferred:
+            prefs.append(f"Preferred dietary preferences: {', '.join(preferred)}")
+        
+        return '\n'.join(prefs) if prefs else "No dietary restrictions."
+    
+    @abstractmethod
+    def _build_system_instructions(self, preferences: str) -> str:
+        """Build system instructions with user preferences.
+        
+        Args:
+            preferences: Formatted user preferences string
+            
+        Returns:
+            str: Complete system instructions for the agent
+        """
+        ...

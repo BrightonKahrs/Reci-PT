@@ -1,6 +1,5 @@
 from fastapi import HTTPException, APIRouter, Depends
 import logging
-import uuid
 
 from models.user_settings import UserSettings
 from state.dependencies import get_state_store
@@ -11,49 +10,39 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/user-settings", tags=["User Settings Endpoints"])
 
+# Single user key - no user_id needed for now
+USER_SETTINGS_KEY = "user_settings"
+
 
 @router.post("/save")
-async def save(request: UserSettings, settings_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
-    """Endpoint to save user settings to the state store
-    
-    If settings_key is provided, updates the existing settings.
-    Otherwise, creates new settings with a generated GUID.
-    """
+async def save(request: UserSettings, state_store: StateStore = Depends(get_state_store)) -> dict:
+    """Endpoint to save user settings to the state store"""
     
     try:
-        # Use provided key or generate a new one
-        if settings_key:
-            key = settings_key
-            action = "updated"
-        else:
-            key = f"user_settings:{uuid.uuid4()}"
-            action = "saved"
-        
         # Convert Pydantic model to dict for storage
         settings_data = request.model_dump()
         
         # Save to state store
-        await state_store.set(key, settings_data)
+        await state_store.set(USER_SETTINGS_KEY, settings_data)
         
-        logger.info(f"{action.capitalize()} user settings: {key}")
+        logger.info(f"Saved user settings")
         
         return {
             "status": "success",
-            "message": f"User settings {action} successfully",
-            "key": key
+            "message": "User settings saved successfully"
         }
     except Exception as e:
         logger.error(f"Error saving user settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to save user settings")
 
 
-@router.get("/{settings_key}")
-async def get_user_settings(settings_key: str, state_store: StateStore = Depends(get_state_store)) -> UserSettings:
+@router.get("/")
+async def get_user_settings(state_store: StateStore = Depends(get_state_store)) -> UserSettings:
     """Endpoint to retrieve saved user settings from the state store"""
     
     try:
         # Retrieve from state store
-        settings_data = await state_store.get(settings_key)
+        settings_data = await state_store.get(USER_SETTINGS_KEY)
         
         if not settings_data:
             raise HTTPException(status_code=404, detail="User settings not found")
@@ -61,7 +50,7 @@ async def get_user_settings(settings_key: str, state_store: StateStore = Depends
         # Validate and return the settings
         settings_model = UserSettings.model_validate(settings_data)
         
-        logger.info(f"Retrieved user settings: {settings_key}")
+        logger.info(f"Retrieved user settings")
         
         return settings_model
     except HTTPException:
@@ -71,44 +60,25 @@ async def get_user_settings(settings_key: str, state_store: StateStore = Depends
         raise HTTPException(status_code=500, detail="Failed to retrieve user settings")
     
     
-@router.delete("/{settings_key}")
-async def delete_user_settings(settings_key: str, state_store: StateStore = Depends(get_state_store)) -> dict:
+@router.delete("/")
+async def delete_user_settings(state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to delete saved user settings from the state store"""
     
     try:
         # Delete from state store
-        deleted = await state_store.delete(settings_key)
+        deleted = await state_store.delete(USER_SETTINGS_KEY)
         
         if not deleted:
             raise HTTPException(status_code=404, detail="User settings not found")
         
-        logger.info(f"Deleted user settings: {settings_key}")
+        logger.info(f"Deleted user settings")
         
         return {
             "status": "success",
-            "message": f"User settings with key '{settings_key}' deleted successfully"
+            "message": "User settings deleted successfully"
         }
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error deleting user settings: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete user settings")
-    
-
-@router.get("/")
-async def list_user_settings(state_store: StateStore = Depends(get_state_store)) -> dict:
-    """Endpoint to list all saved user settings keys in the state store"""
-    
-    try:
-        # List all user settings keys
-        settings_keys = await state_store.list(prefix="user_settings:")
-        
-        logger.info(f"Listed {len(settings_keys)} user settings")
-        
-        return {
-            "status": "success",
-            "settings_keys": settings_keys
-        }
-    except Exception as e:
-        logger.error(f"Error listing user settings: {e}")
-        raise HTTPException(status_code=500, detail="Failed to list user settings")
