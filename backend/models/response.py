@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from backend.models.recipe import Recipe
+from models.recipe import Recipe
 
 
 class RecipeInput(BaseModel):

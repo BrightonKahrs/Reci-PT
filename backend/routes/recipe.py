@@ -2,7 +2,8 @@ from fastapi import HTTPException, APIRouter, Depends
 import logging
 import uuid
 
-from backend.models.response import RecipeOutput
+from models.response import RecipeOutput
+from state.dependencies import get_state_store
 from state.store import StateStore
 
 
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/recipe", tags=["Recipe Endpoints"])
 
 
 @router.post("/save")
-async def save_recipe(request: RecipeOutput, recipe_key: str = None, state_store: StateStore = Depends()) -> dict:
+async def save_recipe(request: RecipeOutput, recipe_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to save a generated recipe to the state store
     
     If recipe_key is provided, updates the existing recipe.
@@ -47,7 +48,7 @@ async def save_recipe(request: RecipeOutput, recipe_key: str = None, state_store
 
 
 @router.get("/{recipe_key}")
-async def get_recipe(recipe_key: str, state_store: StateStore = Depends()) -> RecipeOutput:
+async def get_recipe(recipe_key: str, state_store: StateStore = Depends(get_state_store)) -> RecipeOutput:
     """Endpoint to retrieve a saved recipe from the state store"""
     
     try:
@@ -72,7 +73,7 @@ async def get_recipe(recipe_key: str, state_store: StateStore = Depends()) -> Re
     
     
 @router.delete("/{recipe_key}")
-async def delete_recipe(recipe_key: str, state_store: StateStore = Depends()) -> dict:
+async def delete_recipe(recipe_key: str, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to delete a saved recipe from the state store"""
     
     try:
@@ -96,7 +97,7 @@ async def delete_recipe(recipe_key: str, state_store: StateStore = Depends()) ->
     
 
 @router.get("/")
-async def list_recipes(state_store: StateStore = Depends()) -> dict:
+async def list_recipes(state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to list all saved recipe keys in the state store"""
     
     try:

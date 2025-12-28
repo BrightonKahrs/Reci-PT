@@ -4,7 +4,7 @@ from agent_framework import ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
-from backend.models.recipe import Recipe
+from models.recipe import Recipe
 from state.store import StateStore
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from agent_framework import AgentThread, ChatMessage
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
-from backend.models.meal_plan import MealPlan
+from models.meal_plan import MealPlan
 from state.store import StateStore
 from typing import Union
 

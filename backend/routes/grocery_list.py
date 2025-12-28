@@ -2,7 +2,8 @@ from fastapi import HTTPException, APIRouter, Depends
 import logging
 import uuid
 
-from backend.models.grocery_list import GroceryList
+from models.grocery_list import GroceryList
+from state.dependencies import get_state_store
 from state.store import StateStore
 
 
@@ -12,7 +13,7 @@ router = APIRouter(prefix="/grocery-list", tags=["Grocery List Endpoints"])
 
 
 @router.post("/save")
-async def save_grocery_list(request: GroceryList, grocery_list_key: str = None, state_store: StateStore = Depends()) -> dict:
+async def save_grocery_list(request: GroceryList, grocery_list_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to save a grocery list to the state store
     
     If grocery_list_key is provided, updates the existing grocery list.
@@ -47,7 +48,7 @@ async def save_grocery_list(request: GroceryList, grocery_list_key: str = None, 
 
 
 @router.get("/{grocery_list_key}")
-async def get_grocery_list(grocery_list_key: str, state_store: StateStore = Depends()) -> GroceryList:
+async def get_grocery_list(grocery_list_key: str, state_store: StateStore = Depends(get_state_store)) -> GroceryList:
     """Endpoint to retrieve a saved grocery list from the state store"""
     
     try:
@@ -71,7 +72,7 @@ async def get_grocery_list(grocery_list_key: str, state_store: StateStore = Depe
     
     
 @router.delete("/{grocery_list_key}")
-async def delete_grocery_list(grocery_list_key: str, state_store: StateStore = Depends()) -> dict:
+async def delete_grocery_list(grocery_list_key: str, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to delete a saved grocery list from the state store"""
     
     try:
@@ -95,7 +96,7 @@ async def delete_grocery_list(grocery_list_key: str, state_store: StateStore = D
     
 
 @router.get("/")
-async def list_grocery_lists(state_store: StateStore = Depends()) -> dict:
+async def list_grocery_lists(state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to list all saved grocery list keys in the state store"""
     
     try:

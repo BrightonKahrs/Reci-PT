@@ -1,10 +1,11 @@
 from fastapi import HTTPException, APIRouter, Depends
 import logging
 
-from backend.ai.agents.meal_plan_agent import MealPlanAgent
+from ai.agents.meal_plan_agent import MealPlanAgent
 from ai.agents.recipe_agent import RecipeAgent
-from backend.models.response import RecipeInput, RecipeOutput
-from backend.models.meal_plan import MealPlan
+from models.response import RecipeInput, RecipeOutput
+from models.meal_plan import MealPlan
+from state.dependencies import get_state_store
 from state.store import StateStore
 
 
@@ -14,7 +15,7 @@ router = APIRouter(prefix="/ai", tags=["AI Endpoints"])
 
 
 @router.post("/generate-recipe", response_model=RecipeOutput)
-async def generate_recipe(request: RecipeInput, state_store: StateStore = Depends()) -> RecipeOutput:
+async def generate_recipe(request: RecipeInput, state_store: StateStore = Depends(get_state_store)) -> RecipeOutput:
     """Endpoint to generate a recipe based on user query"""
 
     recipe_agent = RecipeAgent(state_store=state_store)
@@ -31,7 +32,7 @@ async def generate_recipe(request: RecipeInput, state_store: StateStore = Depend
 
 
 @router.post("/generate-recipe-plan", response_model=MealPlan)
-async def generate_recipe_plan(request: RecipeInput, state_store: StateStore = Depends()) -> MealPlan:
+async def generate_recipe_plan(request: RecipeInput, state_store: StateStore = Depends(get_state_store)) -> MealPlan:
     """Endpoint to generate a recipe plan based on user query"""
 
     meal_plan_agent = MealPlanAgent(state_store=state_store)

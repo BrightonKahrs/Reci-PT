@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Literal
 
-from backend.models.recipe import MacroNutrition
+from models.recipe import MacroNutrition
 
 
 class RecipePlan(BaseModel):
