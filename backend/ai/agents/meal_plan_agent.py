@@ -92,11 +92,11 @@ system_instructions = f"""
 """
 
 
-class RecipePlanAgent(BaseAgent):
+class MealPlanAgent(BaseAgent):
     """Agent that specializes in translating natural language to DAX queries."""
 
     def __init__(self):
-        super().__init__(agent_name="RecipePlanAgent")
+        super().__init__(agent_name="MealPlanAgent")
         
     async def generate_recipe_plan(self, user_query: str) -> MealPlan:
         """Generates a recipe plan based on the user's natural language query

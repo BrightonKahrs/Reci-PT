@@ -1,7 +1,7 @@
 from fastapi import HTTPException, APIRouter
 import logging
 
-from ai.agents.recipe_plan_agent import RecipePlanAgent
+from backend.ai.agents.meal_plan_agent import MealPlanAgent
 from ai.agents.recipe_agent import RecipeAgent
 from backend.models.response import RecipeInput, RecipeOutput
 from backend.models.meal_plan import MealPlan
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ai", tags=["AI Endpoints"])
 
-recipe_plan_agent = RecipePlanAgent()
+meal_plan_agent = MealPlanAgent()
 recipe_agent = RecipeAgent()
 
 
@@ -35,12 +35,12 @@ async def generate_recipe(request: RecipeInput) -> RecipeOutput:
 async def generate_recipe_plan(request: RecipeInput) -> MealPlan:
     """Endpoint to generate a recipe plan based on user query"""
 
-    await recipe_plan_agent.start()
+    await meal_plan_agent.start()
     try:
         # Agent returns validated Pydantic model directly
-        return await recipe_plan_agent.generate_recipe_plan(user_query=request.query)
+        return await meal_plan_agent.generate_recipe_plan(user_query=request.query)
     except Exception as e:
         logger.error(f"Error generating recipe plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate recipe plan")
     finally:
-        await recipe_plan_agent.stop()
+        await meal_plan_agent.stop()
