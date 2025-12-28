@@ -3,8 +3,13 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 
-from routes import state_store
-from routes import ai_endpoints
+from backend.routes import recipe
+from backend.routes import ai
+from backend.routes import user_settings
+from backend.routes import meal_plan
+from backend.routes import grocery_list
+from backend.state.store import StateStore
+from backend.state.local_store import LocalStateStore
 
 # Configure logging
 logging.basicConfig(
@@ -18,11 +23,26 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
+# Initialize single state store instance
+state_store: StateStore = LocalStateStore()
+
+# Dependency function for state store injection
+def get_state_store() -> StateStore:
+    return state_store
+
+# Make dependency available to all routes
 app = FastAPI(
     title="Recipe AI Backend",
     description="Backend API for Recipe AI with chat capabilities",
     version="1.0.0"
 )
+
+# Override the default Depends() to use our get_state_store function
+from fastapi import Depends as FastAPIDepends
+def Depends(dependency=None):
+    if dependency is None:
+        return FastAPIDepends(get_state_store)
+    return FastAPIDepends(dependency)
 
 # Configure CORS
 app.add_middleware(
@@ -44,8 +64,11 @@ async def root():
     }
 
 # Included routers
-app.include_router(ai_endpoints.router)
-app.include_router(state_store.router)
+app.include_router(ai.router)
+app.include_router(recipe.router)
+app.include_router(user_settings.router)
+app.include_router(meal_plan.router)
+app.include_router(grocery_list.router)
 
 if __name__ == "__main__":
     import uvicorn

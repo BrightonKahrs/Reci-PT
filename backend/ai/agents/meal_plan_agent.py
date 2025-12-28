@@ -5,43 +5,105 @@ from agent_framework import AgentThread, ChatMessage
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
 from backend.models.meal_plan import MealPlan
+from state.store import StateStore
 from typing import Union
 
 logger = logging.getLogger(__name__)
 
-# TODO: add preferences section
-preferences= """
-    Daily calorie target: 2500cal
-    Daily protein target: 180g
 
-    I want to make everything from scratch using whole food ingredients.
-    I want meals that are flavorful and diverse
-    Prioritize finding creative ways to have synergy between meal's ingredients (for example if im making hamburgers one night, then we could do beef tacos another night to reuse the ground beef)
-    I want cook time to be less than an hour per meal
-"""
+class MealPlanAgent(BaseAgent):
+    """Agent that specializes in generating meal plans."""
 
+    def __init__(self, state_store: StateStore):
+        super().__init__(agent_name="MealPlanAgent")
+        self.state_store = state_store
+        
+    async def generate_recipe_plan(self, user_query: str, user_id: str = "default") -> MealPlan:
+        """Generates a recipe plan based on the user's natural language query
+            If a thread is provided it will be used, otherwise it will generate a new thread.
 
-system_instructions = f"""
+        Args:
+            user_query (str): The natural language query from the user.
+            user_id (str): The user ID for looking up preferences (default: "default")
+            
+        Returns:
+            MealPlan: The validated recipe plan model."""
+        
+        self._ensure_client()
+        
+        if not self._client:
+            raise RuntimeError("RecipePlanAgent not started. Call start() first.")
+
+        # Load user preferences and build system instructions
+        preferences = await self._load_user_preferences(user_id)
+        system_instructions = self._build_system_instructions(preferences)
+
+        agent = self._client.create_agent(
+            id="RecipePlanAgent", 
+            system_instructions=system_instructions,
+            tools=[],
+            response_format=MealPlan
+        )
+
+        if not self._thread:
+            self._thread = agent.get_new_thread()
+
+        result = await agent.run(user_query, thread=self._thread)
+        logger.info(f"Generated Recipe Plan: {result.text}")
+        # Parse the JSON response into Pydantic model
+        return MealPlan.model_validate_json(result.text)
+    
+    async def _load_user_preferences(self, user_id: str) -> str:
+        """Load user preferences from state store"""
+        prefs_key = f"user_settings:{user_id}"
+        user_settings = await self.state_store.get(prefs_key)
+        
+        if not user_settings:
+            return "No specific dietary preferences set."
+        
+        return self._format_preferences(user_settings)
+    
+    def _format_preferences(self, settings: dict) -> str:
+        """Format user settings into preference string"""
+        user_settings_list = settings.get('user_settings', [])
+        
+        required = [s['dietary_preference'] for s in user_settings_list 
+                   if s.get('order_of_importance') == 'Required']
+        preferred = [s['dietary_preference'] for s in user_settings_list 
+                    if s.get('order_of_importance') == 'Preferred']
+        
+        prefs = []
+        if required:
+            prefs.append(f"REQUIRED dietary restrictions: {', '.join(required)}")
+        if preferred:
+            prefs.append(f"Preferred dietary preferences: {', '.join(preferred)}")
+        
+        return '\\n'.join(prefs) if prefs else "No dietary restrictions."
+    
+    def _build_system_instructions(self, preferences: str) -> str:
+        """Build system instructions with user preferences"""
+        return f"""
     You are a Recipe Planner Agent that translates user prompts into an expected recipe plan.
 
-    You MUST honor any dietary preferences specified by the user. 
-    Do NOT add more recipes than specifically requested by the user.
-    ALWAYS adhere to these preferences supplied by the user:
+    User Preferences:
     {preferences}
+
+    You MUST honor any dietary preferences specified by the user.
+    Do NOT add more recipes than specifically requested by the user.
 
     The response MUST be in JSON format matching the MealPlan schema:
     {MealPlan.model_json_schema()}
 
     Example 1:
-    User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday for myself and my partner.
-    I also want to meal prep lunches for myself for every weekday, the meal prep should be high in protein and nutritionally dense.
-    Response:
+    User Prompt: I want 3 recipes for a vegetarian dinner on Monday, Wednesday, and Friday
+    
+    Model Output (This should be the full, correct JSON):
     {{
         "recipe_plan": [
         {{
             "recipe_title": "zuchinni noodles with pesto",
             "meal_type": "dinner",
-            "meal_day": ["monday"]
+            "meal_day": ["monday"],
             "servings": 2,
             "estimated_macros": {{
                 "calories": 400,
@@ -65,7 +127,7 @@ system_instructions = f"""
         {{
             "recipe_title": "stuffed bell peppers with black beans and corn",
             "meal_type": "dinner",
-            "meal_day": ["friday"]
+            "meal_day": ["friday"],
             "servings": 2,
             "estimated_macros": {{
                 "calories": 500,
@@ -88,42 +150,4 @@ system_instructions = f"""
         }}
         ]
     }}
-
 """
-
-
-class MealPlanAgent(BaseAgent):
-    """Agent that specializes in translating natural language to DAX queries."""
-
-    def __init__(self):
-        super().__init__(agent_name="MealPlanAgent")
-        
-    async def generate_recipe_plan(self, user_query: str) -> MealPlan:
-        """Generates a recipe plan based on the user's natural language query
-            If a thread is provided it will be used, otherwise it will generate a new thread.
-
-        Args:
-            user_query (str): The natural language query from the user.
-            
-        Returns:
-            MealPlan: The validated recipe plan model."""
-        
-        self._ensure_client()
-        
-        if not self._client:
-            raise RuntimeError("RecipePlanAgent not started. Call start() first.")
-
-        agent = self._client.create_agent(
-            id="RecipePlanAgent", 
-            system_instructions=system_instructions,
-            tools=[],
-            response_format=MealPlan
-        )
-
-        if not self._thread:
-            self._thread = agent.get_new_thread()
-
-        result = await agent.run(user_query, thread=self._thread)
-        logger.info(f"Generated Recipe Plan: {result.text}")
-        # Parse the JSON response into Pydantic model
-        return MealPlan.model_validate_json(result.text)

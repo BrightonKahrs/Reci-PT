@@ -1,22 +1,18 @@
-from fastapi import HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter, Depends
 import logging
 import uuid
 
 from backend.models.meal_plan import MealPlan
-
 from state.store import StateStore
-from backend.state.local_store import LocalStateStore
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/meal-plan", tags=["Meal Plan Endpoints"])
 
-state_store: StateStore= LocalStateStore()
-
 
 @router.post("/save")
-async def save_meal_plan(request: MealPlan, meal_plan_key: str = None) -> dict:
+async def save_meal_plan(request: MealPlan, meal_plan_key: str = None, state_store: StateStore = Depends()) -> dict:
     """Endpoint to save a generated meal plan to the state store
     
     If meal_plan_key is provided, updates the existing meal plan.
@@ -51,7 +47,7 @@ async def save_meal_plan(request: MealPlan, meal_plan_key: str = None) -> dict:
 
 
 @router.get("/{meal_plan_key}")
-async def get_meal_plan(meal_plan_key: str) -> MealPlan:
+async def get_meal_plan(meal_plan_key: str, state_store: StateStore = Depends()) -> MealPlan:
     """Endpoint to retrieve a saved meal plan from the state store"""
     
     try:
@@ -75,7 +71,7 @@ async def get_meal_plan(meal_plan_key: str) -> MealPlan:
     
     
 @router.delete("/{meal_plan_key}")
-async def delete_meal_plan(meal_plan_key: str) -> dict:
+async def delete_meal_plan(meal_plan_key: str, state_store: StateStore = Depends()) -> dict:
     """Endpoint to delete a saved meal plan from the state store"""
     
     try:
@@ -99,7 +95,7 @@ async def delete_meal_plan(meal_plan_key: str) -> dict:
     
 
 @router.get("/")
-async def list_meal_plans() -> dict:
+async def list_meal_plans(state_store: StateStore = Depends()) -> dict:
     """Endpoint to list all saved meal plan keys in the state store"""
     
     try:

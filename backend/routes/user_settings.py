@@ -1,22 +1,18 @@
-from fastapi import HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter, Depends
 import logging
 import uuid
 
 from backend.models.user_settings import UserSettings
-
 from state.store import StateStore
-from backend.state.local_store import LocalStateStore
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/user-settings", tags=["User Settings Endpoints"])
 
-state_store: StateStore= LocalStateStore()
-
 
 @router.post("/save")
-async def save(request: UserSettings, settings_key: str = None) -> dict:
+async def save(request: UserSettings, settings_key: str = None, state_store: StateStore = Depends()) -> dict:
     """Endpoint to save user settings to the state store
     
     If settings_key is provided, updates the existing settings.
@@ -51,7 +47,7 @@ async def save(request: UserSettings, settings_key: str = None) -> dict:
 
 
 @router.get("/{settings_key}")
-async def get_user_settings(settings_key: str) -> UserSettings:
+async def get_user_settings(settings_key: str, state_store: StateStore = Depends()) -> UserSettings:
     """Endpoint to retrieve saved user settings from the state store"""
     
     try:
@@ -75,7 +71,7 @@ async def get_user_settings(settings_key: str) -> UserSettings:
     
     
 @router.delete("/{settings_key}")
-async def delete_user_settings(settings_key: str) -> dict:
+async def delete_user_settings(settings_key: str, state_store: StateStore = Depends()) -> dict:
     """Endpoint to delete saved user settings from the state store"""
     
     try:
@@ -99,7 +95,7 @@ async def delete_user_settings(settings_key: str) -> dict:
     
 
 @router.get("/")
-async def list_user_settings() -> dict:
+async def list_user_settings(state_store: StateStore = Depends()) -> dict:
     """Endpoint to list all saved user settings keys in the state store"""
     
     try:
