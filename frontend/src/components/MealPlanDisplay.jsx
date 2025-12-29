@@ -1,17 +1,24 @@
 import React, { useState } from 'react'
 
-function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [] }) {
+function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [] }) {
   const [selectingCell, setSelectingCell] = useState(null) // { day, mealType }
   
-  if (!recipePlan && !isCreating) return null
+  if (!mealPlan && !isCreating) return null
 
   // Show the weekly grid for both creating (empty) and viewing (filled)
-  const displayPlan = recipePlan || []
+  const displayPlan = mealPlan?.recipe_plan || []
+  const title = mealPlan?.meal_plan_title || ''
   const isEditable = isCreating || status === 'draft'
 
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const mealTypes = ['breakfast', 'lunch', 'snack', 'dinner']
+
+  const handleTitleChange = (newTitle) => {
+    if (onUpdate) {
+      onUpdate({ ...mealPlan, meal_plan_title: newTitle })
+    }
+  }
 
   const handleCellClick = (day, mealType) => {
     if (!isEditable) return
@@ -33,13 +40,13 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
     }
     
     // Remove any existing meal at this slot and add the new one
-    const updatedPlan = [
+    const updatedRecipePlan = [
       ...displayPlan.filter(p => !(p.meal_type === mealType && p.meal_day === day)),
       newMeal
     ]
     
     if (onUpdate) {
-      onUpdate(updatedPlan)
+      onUpdate({ ...mealPlan, recipe_plan: updatedRecipePlan })
     }
     
     setSelectingCell(null)
@@ -49,12 +56,12 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
     e.stopPropagation()
     if (!isEditable) return
     
-    const updatedPlan = displayPlan.filter(p => 
+    const updatedRecipePlan = displayPlan.filter(p => 
       !(p.meal_type === mealType && (Array.isArray(p.meal_day) ? p.meal_day.includes(day) : p.meal_day === day))
     )
     
     if (onUpdate) {
-      onUpdate(updatedPlan)
+      onUpdate({ ...mealPlan, recipe_plan: updatedRecipePlan })
     }
   }
 
@@ -71,11 +78,24 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
         {status === 'draft' ? '📝 Draft' : '✓ Saved'}
       </div>
       <div className="plan-header">
-        <h2>📅 {isCreating && !recipePlan ? 'New Meal Plan' : 'Your Weekly Meal Plan'}</h2>
+        <div className="plan-title-section">
+          <span className="plan-icon">📅</span>
+          {isEditable ? (
+            <input
+              type="text"
+              className="plan-title-input"
+              value={title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="Enter meal plan title..."
+            />
+          ) : (
+            <h2>{title || 'Weekly Meal Plan'}</h2>
+          )}
+        </div>
         <div className="plan-header-right">
           <p className="plan-count">{displayPlan.length} meals</p>
           <div className="plan-actions">
-            {displayPlan.length > 0 && (
+            {(displayPlan.length > 0 || title) && (
               <button className="save-btn" onClick={onSave}>💾 Save</button>
             )}
             {isCreating && (

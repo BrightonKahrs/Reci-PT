@@ -602,6 +602,46 @@
   align-items: flex-start;
 }
 
+.plan-title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.plan-icon {
+  font-size: 1.25rem;
+}
+
+.plan-title-section h2 {
+  font-size: 1.25rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.plan-title-input {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  background: #fafafa;
+  max-width: 300px;
+}
+
+.plan-title-input:focus {
+  outline: none;
+  border-color: #3498db;
+  background: white;
+}
+
+.plan-title-input::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
 .plan-header h2 {
   font-size: 1.25rem;
   color: #2c3e50;

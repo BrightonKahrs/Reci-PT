@@ -18,4 +18,5 @@ class RecipePlan(BaseModel):
 class MealPlan(BaseModel):
     """Represents a list of recipe plans"""
     model_config = ConfigDict(extra='forbid')
+    meal_plan_title: str
     recipe_plan: List[RecipePlan]

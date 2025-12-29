@@ -21,7 +21,7 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCrea
           {savedMealPlans.map((item) => (
             <div key={item.key} className="saved-item-card meal-plan-card">
               <div className="saved-item-header">
-                <h4>Meal Plan</h4>
+                <h4>{item.meal_plan.meal_plan_title || 'Untitled Plan'}</h4>
                 <button 
                   className="delete-btn" 
                   onClick={(e) => {
@@ -46,7 +46,7 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCrea
               </div>
               <button 
                 className="load-btn"
-                onClick={() => onView(item.meal_plan.recipe_plan)}
+                onClick={() => onView(item.meal_plan)}
               >
                 View Plan
               </button>

@@ -13,7 +13,7 @@ const API_BASE_URL = 'http://localhost:8000'
 
 function App() {
   const [recipe, setRecipe] = useState(null)
-  const [recipePlan, setRecipePlan] = useState(null)
+  const [mealPlan, setMealPlan] = useState(null) // { meal_plan_title, recipe_plan }
   const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
@@ -102,12 +102,12 @@ function App() {
   }
 
   const saveCurrentMealPlan = async () => {
-    if (!recipePlan) return
+    if (!mealPlan) return
     try {
       const response = await fetch(`${API_BASE_URL}/meal-plan/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe_plan: recipePlan })
+        body: JSON.stringify(mealPlan)
       })
       if (response.ok) {
         setMealPlanStatus('saved')
@@ -251,17 +251,17 @@ function App() {
             {leftTab === 'plan' && (
               <>
                 <MealPlanDisplay 
-                  recipePlan={recipePlan} 
+                  mealPlan={mealPlan} 
                   onSave={saveCurrentMealPlan}
-                  onUpdate={(plan) => {
-                    setRecipePlan(plan)
+                  onUpdate={(updatedMealPlan) => {
+                    setMealPlan(updatedMealPlan)
                     setMealPlanStatus('draft')
                   }}
                   isCreating={isCreatingMealPlan}
                   status={mealPlanStatus}
                   onStatusChange={setMealPlanStatus}
                   onCancel={() => {
-                    setRecipePlan(null)
+                    setMealPlan(null)
                     setIsCreatingMealPlan(false)
                   }}
                   savedRecipes={savedRecipes}
@@ -270,16 +270,15 @@ function App() {
                   savedMealPlans={savedMealPlans}
                   loading={savedItemsLoading}
                   onDelete={deleteMealPlan}
-                  onView={(plan) => {
-                    setRecipePlan(plan)
+                  onView={(savedMealPlan) => {
+                    setMealPlan(savedMealPlan)
                     setIsCreatingMealPlan(false)
                     setMealPlanStatus('saved')
                   }}
                   onCreateNew={() => {
-                    setRecipePlan(null)
+                    setMealPlan({ meal_plan_title: '', recipe_plan: [] })
                     setIsCreatingMealPlan(true)
-                    setChatInputValue('@mealplan_agent ')
-                    setRightTab('chat')
+                    setMealPlanStatus('draft')
                   }}
                 />
               </>
@@ -315,8 +314,12 @@ function App() {
                   setRecipeStatus('draft')
                   setLeftTab('recipe')
                 }}
-                onMealPlanGenerated={(mealPlan) => {
-                  setRecipePlan(mealPlan)
+                onMealPlanGenerated={(generatedMealPlan) => {
+                  // generatedMealPlan from API is just the recipe_plan array
+                  setMealPlan({ 
+                    meal_plan_title: 'Generated Meal Plan', 
+                    recipe_plan: generatedMealPlan 
+                  })
                   setIsCreatingMealPlan(false)
                   setMealPlanStatus('draft')
                   setLeftTab('plan')
