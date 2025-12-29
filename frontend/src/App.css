@@ -363,9 +363,8 @@
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
-  overflow-y: hidden;
-  flex: 1;
-  min-height: 0;
+  overflow-y: auto;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
 }
@@ -398,8 +397,8 @@
 
 .weekly-grid-header {
   display: grid;
-  grid-template-columns: 150px repeat(7, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: 100px repeat(7, 1fr);
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
   flex-shrink: 0;
 }
@@ -417,14 +416,10 @@
 
 .meal-row {
   display: grid;
-  grid-template-columns: 150px repeat(7, 1fr);
-  grid-template-rows: 1fr;
-  gap: 0.75rem;
-  flex: 1 1 0;
-  min-height: 0;
-  max-height: 25%;
+  grid-template-columns: 100px repeat(7, 1fr);
+  gap: 0.5rem;
+  min-height: 70px;
   align-items: stretch;
-  overflow: hidden;
 }
 
 .meal-row:last-child {
