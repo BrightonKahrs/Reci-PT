@@ -1,0 +1,220 @@
+{
+  "user_settings": {
+    "user_settings": [
+      {
+        "dietary_preference": "no added sugar",
+        "order_of_importance": "Required",
+        "generated_by": "user"
+      },
+      {
+        "dietary_preference": "no dairy",
+        "order_of_importance": "Required",
+        "generated_by": "user"
+      },
+      {
+        "dietary_preference": "high protein",
+        "order_of_importance": "Preferred",
+        "generated_by": "user"
+      },
+      {
+        "dietary_preference": "all food should be made from scratch as much as possible",
+        "order_of_importance": "Preferred",
+        "generated_by": "user"
+      }
+    ]
+  },
+  "recipes": {
+    "recipe:1": {
+      "title": "Mediterranean Quinoa Bowl",
+      "description": "A hearty and nutritious quinoa bowl with roasted vegetables, chickpeas, and a lemon-tahini dressing.",
+      "complexity": "Easy",
+      "dietary_preferences": "vegetarian, vegan, dairy-free",
+      "ingredients": [
+        {"name": "quinoa", "quantity": "1 cup"},
+        {"name": "chickpeas (canned, drained)", "quantity": "1 can (15 oz)"},
+        {"name": "cherry tomatoes", "quantity": "1 cup"},
+        {"name": "cucumber", "quantity": "1 medium"},
+        {"name": "red onion", "quantity": "1/4 cup, diced"},
+        {"name": "kalamata olives", "quantity": "1/4 cup"},
+        {"name": "tahini", "quantity": "2 tbsp"},
+        {"name": "lemon juice", "quantity": "2 tbsp"},
+        {"name": "olive oil", "quantity": "1 tbsp"},
+        {"name": "garlic", "quantity": "1 clove, minced"},
+        {"name": "salt and pepper", "quantity": "to taste"}
+      ],
+      "instructions": [
+        {"step_number": 1, "description": "Cook quinoa according to package directions and let cool slightly."},
+        {"step_number": 2, "description": "Dice cucumber and halve cherry tomatoes."},
+        {"step_number": 3, "description": "In a small bowl, whisk together tahini, lemon juice, olive oil, garlic, and a splash of water to thin."},
+        {"step_number": 4, "description": "Assemble bowls with quinoa, chickpeas, tomatoes, cucumber, red onion, and olives."},
+        {"step_number": 5, "description": "Drizzle with tahini dressing and season with salt and pepper."}
+      ],
+      "number_of_servings": 2,
+      "nutritional_info": {
+        "calories": 450,
+        "protein": 18.0,
+        "fat": 16.0,
+        "carbohydrates": 58.0
+      }
+    },
+    "recipe:2": {
+      "title": "Spicy Black Bean Tacos",
+      "description": "Flavorful black bean tacos with fresh salsa, avocado, and a kick of lime.",
+      "complexity": "Easy",
+      "dietary_preferences": "vegetarian, vegan, dairy-free",
+      "ingredients": [
+        {"name": "black beans (canned, drained)", "quantity": "1 can (15 oz)"},
+        {"name": "corn tortillas", "quantity": "6 small"},
+        {"name": "avocado", "quantity": "1 large"},
+        {"name": "tomato", "quantity": "1 medium, diced"},
+        {"name": "red onion", "quantity": "1/4 cup, diced"},
+        {"name": "cilantro", "quantity": "1/4 cup, chopped"},
+        {"name": "lime", "quantity": "1"},
+        {"name": "cumin", "quantity": "1 tsp"},
+        {"name": "chili powder", "quantity": "1/2 tsp"},
+        {"name": "garlic powder", "quantity": "1/2 tsp"},
+        {"name": "salt", "quantity": "to taste"}
+      ],
+      "instructions": [
+        {"step_number": 1, "description": "In a pan, heat black beans with cumin, chili powder, and garlic powder over medium heat."},
+        {"step_number": 2, "description": "Mash beans slightly with a fork, leaving some whole for texture."},
+        {"step_number": 3, "description": "Warm tortillas in a dry skillet or microwave."},
+        {"step_number": 4, "description": "Mix diced tomato, red onion, cilantro, and juice of half a lime for fresh salsa."},
+        {"step_number": 5, "description": "Assemble tacos with beans, sliced avocado, and fresh salsa. Squeeze remaining lime on top."}
+      ],
+      "number_of_servings": 2,
+      "nutritional_info": {
+        "calories": 380,
+        "protein": 14.0,
+        "fat": 12.0,
+        "carbohydrates": 52.0
+      }
+    },
+    "recipe:3": {
+      "title": "Thai Peanut Noodles",
+      "description": "Creamy peanut noodles with crispy tofu and fresh vegetables in a savory Thai-inspired sauce.",
+      "complexity": "Medium",
+      "dietary_preferences": "vegetarian, vegan, dairy-free",
+      "ingredients": [
+        {"name": "rice noodles", "quantity": "8 oz"},
+        {"name": "firm tofu", "quantity": "14 oz block"},
+        {"name": "peanut butter", "quantity": "3 tbsp"},
+        {"name": "soy sauce", "quantity": "2 tbsp"},
+        {"name": "rice vinegar", "quantity": "1 tbsp"},
+        {"name": "sesame oil", "quantity": "1 tbsp"},
+        {"name": "sriracha", "quantity": "1 tsp"},
+        {"name": "garlic", "quantity": "2 cloves, minced"},
+        {"name": "red bell pepper", "quantity": "1, sliced"},
+        {"name": "shredded carrots", "quantity": "1 cup"},
+        {"name": "green onions", "quantity": "3, sliced"},
+        {"name": "crushed peanuts", "quantity": "2 tbsp"},
+        {"name": "vegetable oil", "quantity": "2 tbsp"}
+      ],
+      "instructions": [
+        {"step_number": 1, "description": "Press tofu to remove excess moisture, then cut into cubes."},
+        {"step_number": 2, "description": "Cook rice noodles according to package directions, drain and set aside."},
+        {"step_number": 3, "description": "Heat vegetable oil in a large pan and fry tofu until golden on all sides. Remove and set aside."},
+        {"step_number": 4, "description": "Whisk together peanut butter, soy sauce, rice vinegar, sesame oil, sriracha, and garlic with 2 tbsp warm water."},
+        {"step_number": 5, "description": "Toss noodles with peanut sauce, add bell pepper and carrots."},
+        {"step_number": 6, "description": "Top with crispy tofu, green onions, and crushed peanuts."}
+      ],
+      "number_of_servings": 4,
+      "nutritional_info": {
+        "calories": 520,
+        "protein": 22.0,
+        "fat": 24.0,
+        "carbohydrates": 54.0
+      }
+    }
+  },
+  "meal_plans": {
+    "meal_plan:1": {
+      "recipe_plan": [
+        {
+          "recipe_title": "Overnight Oats with Berries",
+          "meal_type": "breakfast",
+          "meal_day": ["monday", "wednesday", "friday"],
+          "servings": 1,
+          "estimated_macros": {
+            "calories": 350,
+            "protein": 12.0,
+            "fat": 8.0,
+            "carbohydrates": 55.0
+          }
+        },
+        {
+          "recipe_title": "Avocado Toast with Chickpeas",
+          "meal_type": "breakfast",
+          "meal_day": ["tuesday", "thursday"],
+          "servings": 1,
+          "estimated_macros": {
+            "calories": 380,
+            "protein": 14.0,
+            "fat": 16.0,
+            "carbohydrates": 42.0
+          }
+        },
+        {
+          "recipe_title": "Mediterranean Quinoa Bowl",
+          "meal_type": "lunch",
+          "meal_day": ["monday", "wednesday"],
+          "servings": 1,
+          "estimated_macros": {
+            "calories": 450,
+            "protein": 18.0,
+            "fat": 16.0,
+            "carbohydrates": 58.0
+          }
+        },
+        {
+          "recipe_title": "Spicy Black Bean Tacos",
+          "meal_type": "lunch",
+          "meal_day": ["tuesday", "thursday", "friday"],
+          "servings": 2,
+          "estimated_macros": {
+            "calories": 380,
+            "protein": 14.0,
+            "fat": 12.0,
+            "carbohydrates": 52.0
+          }
+        },
+        {
+          "recipe_title": "Thai Peanut Noodles",
+          "meal_type": "dinner",
+          "meal_day": ["monday", "thursday"],
+          "servings": 2,
+          "estimated_macros": {
+            "calories": 520,
+            "protein": 22.0,
+            "fat": 24.0,
+            "carbohydrates": 54.0
+          }
+        },
+        {
+          "recipe_title": "Stuffed Bell Peppers",
+          "meal_type": "dinner",
+          "meal_day": ["tuesday", "friday"],
+          "servings": 2,
+          "estimated_macros": {
+            "calories": 420,
+            "protein": 16.0,
+            "fat": 14.0,
+            "carbohydrates": 56.0
+          }
+        },
+        {
+          "recipe_title": "Lentil Vegetable Soup",
+          "meal_type": "dinner",
+          "meal_day": ["wednesday"],
+          "servings": 3,
+          "estimated_macros": {
+            "calories": 320,
+            "protein": 18.0,
+            "fat": 6.0,
+            "carbohydrates": 48.0
+          }
+        }
+      ]
+    }
+  }
+}

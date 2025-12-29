@@ -1,55 +1,223 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
+import { 
+  RecipeDisplay, 
+  MealPlanDisplay, 
+  SavedRecipes, 
+  SavedMealPlans,
+  SettingsPanel,
+  ChatPanel 
+} from './components'
 
 const API_BASE_URL = 'http://localhost:8000'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('recipe')
   const [query, setQuery] = useState('')
   const [recipe, setRecipe] = useState(null)
   const [recipePlan, setRecipePlan] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
+  const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
+  
+  // Settings state
+  const [settings, setSettings] = useState(null)
+  const [newRequiredPref, setNewRequiredPref] = useState('')
+  const [newPreferredPref, setNewPreferredPref] = useState('')
+  
+  // Saved items state
+  const [savedRecipes, setSavedRecipes] = useState([])
+  const [savedMealPlans, setSavedMealPlans] = useState([])
+  const [savedItemsLoading, setSavedItemsLoading] = useState(false)
+
+  // Load settings and saved items on mount
+  useEffect(() => {
+    loadSavedItems()
+    loadSettings()
+  }, [])
+
+  const loadSavedItems = async () => {
+    setSavedItemsLoading(true)
+    try {
+      const [recipesRes, mealPlansRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/recipe/`),
+        fetch(`${API_BASE_URL}/meal-plan/`)
+      ])
+      
+      if (recipesRes.ok) {
+        const recipesData = await recipesRes.json()
+        setSavedRecipes(recipesData.recipes || [])
+      }
+      
+      if (mealPlansRes.ok) {
+        const mealPlansData = await mealPlansRes.json()
+        setSavedMealPlans(mealPlansData.meal_plans || [])
+      }
+    } catch (err) {
+      console.error('Failed to load saved items:', err)
+    } finally {
+      setSavedItemsLoading(false)
+    }
+  }
+
+  const deleteRecipe = async (key) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipe/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to delete recipe:', err)
+    }
+  }
+
+  const deleteMealPlan = async (key) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to delete meal plan:', err)
+    }
+  }
+
+  const saveCurrentRecipe = async () => {
+    if (!recipe) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipe/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(recipe)
+      })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save recipe:', err)
+    }
+  }
+
+  const saveCurrentMealPlan = async () => {
+    if (!recipePlan) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_plan: recipePlan })
+      })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save meal plan:', err)
+    }
+  }
+
+  const loadSettings = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user-settings/`)
+      if (response.ok) {
+        const data = await response.json()
+        setSettings(data)
+      } else {
+        // Initialize with empty structure if no settings exist
+        setSettings({ user_settings: [] })
+      }
+    } catch (err) {
+      console.error('Error loading settings:', err)
+      setSettings({ user_settings: [] })
+    }
+  }
+
+  const saveSettings = async (newSettings) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/user-settings/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSettings),
+      })
+      if (response.ok) {
+        setSettings(newSettings)
+      }
+    } catch (err) {
+      console.error('Error saving settings:', err)
+    }
+  }
+
+  const addPreference = (type) => {
+    const newPref = type === 'Required' ? newRequiredPref.trim() : newPreferredPref.trim()
+    if (!newPref || !settings) return
+
+    const currentPrefs = settings.user_settings || []
+    const newPrefs = [...currentPrefs, { dietary_preference: newPref, order_of_importance: type, generated_by: 'user' }]
+    
+    const newSettings = { ...settings, user_settings: newPrefs }
+    saveSettings(newSettings)
+    
+    if (type === 'Required') {
+      setNewRequiredPref('')
+    } else {
+      setNewPreferredPref('')
+    }
+  }
+
+  const removePreference = (type, prefText) => {
+    if (!settings) return
+    
+    const newPrefs = (settings.user_settings || []).filter(
+      p => !(p.dietary_preference === prefText && p.order_of_importance === type)
+    )
+    
+    const newSettings = { ...settings, user_settings: newPrefs }
+    saveSettings(newSettings)
+  }
+
+  const getRequiredPrefs = () => {
+    return (settings?.user_settings || [])
+      .filter(p => p.order_of_importance === 'Required')
+      .map(p => p.dietary_preference)
+  }
+
+  const getPreferredPrefs = () => {
+    return (settings?.user_settings || [])
+      .filter(p => p.order_of_importance === 'Preferred')
+      .map(p => p.dietary_preference)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!query.trim()) return
     
-    if (!query.trim()) {
-      setError('Please enter a recipe query')
-      return
-    }
-
     setLoading(true)
     setError(null)
-    setRecipe(null)
-    setRecipePlan(null)
 
     try {
-      const endpoint = activeTab === 'recipe' ? '/generate-recipe' : '/generate-recipe-plan'
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const endpoint = leftTab === 'recipe' 
+        ? 'http://localhost:8000/ai/generate-recipe'
+        : 'http://localhost:8000/ai/generate-meal-plan'
+      
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query: query }),
       })
       
       if (!response.ok) {
-        throw new Error(`Failed to generate ${activeTab === 'recipe' ? 'recipe' : 'recipe plan'}`)
+        throw new Error('Failed to generate')
       }
-
-      const data = await response.json()
-      console.log('Received data:', data)
       
-      if (activeTab === 'recipe') {
-        // Recipe is now returned as an object, not a JSON string
+      const data = await response.json()
+      
+      if (leftTab === 'recipe') {
         setRecipe(data.recipe)
       } else {
-        console.log('Setting recipe plan:', data.recipe_plan)
         setRecipePlan(data.recipe_plan)
       }
     } catch (err) {
-      setError(err.message || 'An error occurred while generating the recipe')
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -58,180 +226,115 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <h1>🍳 AI Recipe Generator</h1>
-        <p>Generate custom recipes using AI</p>
+        <h1>🍳 Reci-PT</h1>
+        <p>Your AI-Powered Recipe & Meal Planning Assistant</p>
       </header>
 
-      <main className="main">
-        <div className="tabs">
-          <button 
-            className={`tab ${activeTab === 'recipe' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('recipe')
-              setRecipe(null)
-              setRecipePlan(null)
-              setError(null)
-            }}
-          >
-            Generate Recipe
-          </button>
-          <button 
-            className={`tab ${activeTab === 'plan' ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab('plan')
-              setRecipe(null)
-              setRecipePlan(null)
-              setError(null)
-            }}
-          >
-            Generate Meal Plan
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="query-form">
-          <div className="input-group">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                activeTab === 'recipe' 
-                  ? "E.g., 'vegetarian pasta with tomatoes' or 'quick breakfast ideas'"
-                  : "E.g., 'healthy meal plan for weight loss' or 'vegetarian weekly menu'"
-              }
-              className="query-input"
-              disabled={loading}
-            />
-            <button type="submit" className="submit-button" disabled={loading}>
-              {loading ? 'Generating...' : activeTab === 'recipe' ? 'Generate Recipe' : 'Generate Meal Plan'}
+      <div className="panel-container">
+        {/* Left Panel - 2/3 width */}
+        <div className="left-panel">
+          <div className="panel-tabs">
+            <button 
+              className={`panel-tab ${leftTab === 'recipe' ? 'active' : ''}`}
+              onClick={() => setLeftTab('recipe')}
+            >
+              🍲 Generate Recipe
+            </button>
+            <button 
+              className={`panel-tab ${leftTab === 'plan' ? 'active' : ''}`}
+              onClick={() => setLeftTab('plan')}
+            >
+              📅 Generate Meal Plan
             </button>
           </div>
-        </form>
 
-        {error && (
-          <div className="error-message">
-            ⚠️ {error}
-          </div>
-        )}
+          <div className="panel-content">
+            <form onSubmit={handleSubmit} className="query-form">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={leftTab === 'recipe' 
+                  ? "What recipe would you like? E.g., 'Healthy pasta with vegetables'" 
+                  : "What kind of meal plan? E.g., 'Healthy week with quick dinners'"
+                }
+                className="query-input"
+              />
+              <button type="submit" disabled={loading} className="generate-btn">
+                {loading ? 'Generating...' : `Generate ${leftTab === 'recipe' ? 'Recipe' : 'Meal Plan'}`}
+              </button>
+            </form>
 
-        {recipe && (
-          <div className="recipe-container">
-            <div className="recipe-header">
-              <h2>{recipe.title}</h2>
-              <div className="recipe-meta">
-                <span className="complexity">{recipe.complexity}</span>
-                <span className="dietary">{recipe.dietary_preferences}</span>
-              </div>
-            </div>
-
-            <p className="recipe-description">{recipe.description}</p>
-
-            {recipe.nutritional_info && (
-              <div className="recipe-section nutrition-section">
-                <h3>Nutrition Information</h3>
-                <p className="servings-info">Per serving ({recipe.number_of_servings} servings total)</p>
-                <div className="nutrition-grid">
-                  <div className="nutrition-item">
-                    <span className="nutrition-label">Calories</span>
-                    <span className="nutrition-value">{recipe.nutritional_info.calories} kcal</span>
-                  </div>
-                  <div className="nutrition-item">
-                    <span className="nutrition-label">Protein</span>
-                    <span className="nutrition-value">{recipe.nutritional_info.protein}g</span>
-                  </div>
-                  <div className="nutrition-item">
-                    <span className="nutrition-label">Fat</span>
-                    <span className="nutrition-value">{recipe.nutritional_info.fat}g</span>
-                  </div>
-                  <div className="nutrition-item">
-                    <span className="nutrition-label">Carbs</span>
-                    <span className="nutrition-value">{recipe.nutritional_info.carbohydrates}g</span>
-                  </div>
-                </div>
+            {error && (
+              <div className="error-message">
+                ⚠️ {error}
               </div>
             )}
 
-            <div className="recipe-section">
-              <h3>Ingredients</h3>
-              <ul className="ingredients-list">
-                {recipe.ingredients?.map((ingredient, index) => (
-                  <li key={index}>
-                    <strong>{ingredient.quantity}</strong> {ingredient.name}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {leftTab === 'recipe' && (
+              <>
+                <RecipeDisplay recipe={recipe} onSave={saveCurrentRecipe} />
+                <SavedRecipes 
+                  savedRecipes={savedRecipes}
+                  loading={savedItemsLoading}
+                  onDelete={deleteRecipe}
+                  onView={setRecipe}
+                />
+              </>
+            )}
 
-            <div className="recipe-section">
-              <h3>Instructions</h3>
-              <ol className="instructions-list">
-                {recipe.instructions?.map((instruction) => (
-                  <li key={instruction.step_number}>
-                    {instruction.description}
-                  </li>
-                ))}
-              </ol>
-            </div>
+            {leftTab === 'plan' && (
+              <>
+                <MealPlanDisplay recipePlan={recipePlan} onSave={saveCurrentMealPlan} />
+                <SavedMealPlans 
+                  savedMealPlans={savedMealPlans}
+                  loading={savedItemsLoading}
+                  onDelete={deleteMealPlan}
+                  onView={setRecipePlan}
+                />
+              </>
+            )}
           </div>
-        )}
+        </div>
 
-        {activeTab === 'plan' && (
-          <div className="recipe-plan-container">
-            <div className="plan-header">
-              <h2>📅 Your Weekly Meal Plan</h2>
-              <p className="plan-count">{recipePlan ? `${recipePlan.length} meals planned` : 'Plan your week'}</p>
-            </div>
-            
-            <div className="weekly-grid">
-              <div className="weekly-grid-header">
-                <div className="meal-type-label"></div>
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-                  <div key={day} className="day-header">{day}</div>
-                ))}
-              </div>
-              
-              {['breakfast', 'lunch', 'snack', 'dinner'].map(mealType => (
-                <div key={mealType} className="meal-row">
-                  <div className="meal-type-label">
-                    <span className={`meal-badge ${mealType}`}>
-                      {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
-                    </span>
-                  </div>
-                  
-                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
-                    // Find matching plan for this day/meal combination
-                    const plan = recipePlan?.find(p => 
-                      p.meal_type === mealType && 
-                      (Array.isArray(p.meal_day) ? p.meal_day.includes(day) : p.meal_day === day)
-                    )
-                    
-                    return (
-                      <div key={`${day}-${mealType}`} className={`meal-cell ${plan ? 'filled' : 'empty'}`}>
-                        {plan ? (
-                          <>
-                            <div className="meal-title">{plan.recipe_title}</div>
-                            {plan.servings && (
-                              <div className="meal-servings">🍽️ {plan.servings}</div>
-                            )}
-                            {plan.estimated_macros && (
-                              <div className="meal-macros">
-                                <span>{plan.estimated_macros.calories} cal</span>
-                                <span>P: {plan.estimated_macros.protein}g</span>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="empty-placeholder">-</div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              ))}
-            </div>
+        {/* Right Panel - 1/3 width */}
+        <div className="right-panel">
+          <div className="panel-tabs">
+            <button 
+              className={`panel-tab ${rightTab === 'chat' ? 'active' : ''}`}
+              onClick={() => setRightTab('chat')}
+            >
+              💬 Chat
+            </button>
+            <button 
+              className={`panel-tab ${rightTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setRightTab('settings')}
+            >
+              ⚙️ Settings
+            </button>
           </div>
-        )}
-      </main>
+
+          <div className="panel-content">
+            {rightTab === 'chat' && (
+              <ChatPanel />
+            )}
+
+            {rightTab === 'settings' && (
+              <SettingsPanel 
+                settings={settings}
+                newRequiredPref={newRequiredPref}
+                setNewRequiredPref={setNewRequiredPref}
+                newPreferredPref={newPreferredPref}
+                setNewPreferredPref={setNewPreferredPref}
+                onAddPreference={addPreference}
+                onRemovePreference={removePreference}
+                getRequiredPrefs={getRequiredPrefs}
+                getPreferredPrefs={getPreferredPrefs}
+              />
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,12 +1,13 @@
 from typing import Optional
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 
 from agent_framework.azure import AzureAIClient
 from agent_framework import AgentThread
 from azure.identity.aio import DefaultAzureCredential
 
 from ai.ai_config import config
+from state.store import StateStore
 
 
 logger = logging.getLogger(__name__)
@@ -15,14 +16,16 @@ logger = logging.getLogger(__name__)
 class BaseAgent(ABC):
     """Abstract base class for AI agents with shared Azure AI client setup."""
 
-    def __init__(self, agent_name: str):
+    def __init__(self, agent_name: str, state_store: StateStore):
         """
         Initialize the base agent.
         
         Args:
             agent_name: Name of the agent (used for logging and client identification)
+            state_store: State store instance for accessing application state
         """
         self._agent_name = agent_name
+        self.state_store = state_store
         self._endpoint = config.azure_ai_project_endpoint
         self._deployment_name = config.azure_ai_model_deployment_name
         self._credential: Optional[DefaultAzureCredential] = None
@@ -58,3 +61,51 @@ class BaseAgent(ABC):
         """Ensure client is initialized before use."""
         if not self._client:
             raise RuntimeError(f"{self._agent_name} not started. Call start() first.")
+    
+    async def _load_user_preferences(self) -> str:
+        """Load user preferences from state store"""
+        user_settings = await self.state_store.get("user_settings")
+        
+        if not user_settings:
+            return "No specific dietary preferences set."
+        
+        return self._format_preferences(user_settings)
+    
+    def _format_preferences(self, settings: dict) -> str:
+        """Format user settings into preference string"""
+        user_settings_list = settings.get('user_settings', [])
+        
+        required = [s['dietary_preference'] for s in user_settings_list 
+                   if s.get('order_of_importance') == 'Required']
+        preferred = [s['dietary_preference'] for s in user_settings_list 
+                    if s.get('order_of_importance') == 'Preferred']
+        
+        prefs = []
+        if required:
+            prefs.append(f"REQUIRED dietary restrictions: {', '.join(required)}")
+        if preferred:
+            prefs.append(f"Preferred dietary preferences: {', '.join(preferred)}")
+        
+        return '\n'.join(prefs) if prefs else "No dietary restrictions."
+    
+    @abstractmethod
+    def _build_system_instructions(self) -> str:
+        """Build static system instructions for the agent.
+        
+        Returns:
+            str: Complete system instructions for the agent
+        """
+        ...
+
+    @abstractmethod
+    def _build_user_message(self, user_query: str, preferences: str) -> str:
+        """Build user message with preferences context.
+        
+        Args:
+            user_query (str): The natural language query from the user.
+            preferences (str): Formatted user preferences.
+        
+        Returns:
+            str: Complete user message for the agent
+        """
+        ...
