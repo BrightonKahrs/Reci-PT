@@ -1,7 +1,20 @@
 import React from 'react'
 
-function RecipeDisplay({ recipe, onSave }) {
-  if (!recipe) return null
+function RecipeDisplay({ recipe, onSave, isCreating }) {
+  if (!recipe && !isCreating) return null
+
+  if (isCreating && !recipe) {
+    return (
+      <div className="recipe-container recipe-placeholder">
+        <div className="recipe-placeholder-content">
+          <div className="placeholder-icon">🍳</div>
+          <h2>New Recipe</h2>
+          <p>Use the chat to describe the recipe you'd like to create.</p>
+          <p className="placeholder-hint">Try: "@recipe_agent make me a healthy breakfast with eggs"</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="recipe-container">

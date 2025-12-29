@@ -19,6 +19,8 @@ function App() {
   const [error, setError] = useState(null)
   const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
+  const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
+  const [chatInputValue, setChatInputValue] = useState('')
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -273,16 +275,24 @@ function App() {
 
             {leftTab === 'recipe' && (
               <>
-                <RecipeDisplay recipe={recipe} onSave={saveCurrentRecipe} />
+                <RecipeDisplay 
+                  recipe={recipe} 
+                  onSave={saveCurrentRecipe} 
+                  isCreating={isCreatingRecipe}
+                />
                 <SavedRecipes 
                   savedRecipes={savedRecipes}
                   loading={savedItemsLoading}
                   onDelete={deleteRecipe}
-                  onView={setRecipe}
+                  onView={(r) => {
+                    setRecipe(r)
+                    setIsCreatingRecipe(false)
+                  }}
                   onCreateNew={() => {
                     setRecipe(null)
-                    setQuery('')
-                    document.querySelector('.query-input')?.focus()
+                    setIsCreatingRecipe(true)
+                    setChatInputValue('@recipe_agent ')
+                    setRightTab('chat')
                   }}
                 />
               </>
@@ -321,7 +331,19 @@ function App() {
 
           <div className="panel-content">
             {rightTab === 'chat' && (
-              <ChatPanel />
+              <ChatPanel 
+                inputValue={chatInputValue}
+                onInputChange={setChatInputValue}
+                onRecipeGenerated={(recipe) => {
+                  setRecipe(recipe)
+                  setIsCreatingRecipe(false)
+                  setLeftTab('recipe')
+                }}
+                onMealPlanGenerated={(mealPlan) => {
+                  setRecipePlan(mealPlan)
+                  setLeftTab('plan')
+                }}
+              />
             )}
 
             {rightTab === 'settings' && (
