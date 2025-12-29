@@ -1003,6 +1003,53 @@
   background: #1e8449;
 }
 
+/* Create New Card */
+.create-new-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  border: 2px dashed #ccc;
+  background: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.create-new-card:hover {
+  border-color: #3498db;
+  background: #f0f7ff;
+}
+
+.create-new-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.create-new-icon {
+  font-size: 3rem;
+  color: #bbb;
+  font-weight: 300;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.create-new-card:hover .create-new-icon {
+  color: #3498db;
+}
+
+.create-new-text {
+  font-size: 0.9rem;
+  color: #999;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.create-new-card:hover .create-new-text {
+  color: #3498db;
+}
+
 .plan-header {
   display: flex;
   justify-content: space-between;

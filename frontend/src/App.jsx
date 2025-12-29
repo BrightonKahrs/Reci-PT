@@ -279,6 +279,11 @@ function App() {
                   loading={savedItemsLoading}
                   onDelete={deleteRecipe}
                   onView={setRecipe}
+                  onCreateNew={() => {
+                    setRecipe(null)
+                    setQuery('')
+                    document.querySelector('.query-input')?.focus()
+                  }}
                 />
               </>
             )}

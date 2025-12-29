@@ -1,6 +1,6 @@
 import React from 'react'
 
-function SavedRecipes({ savedRecipes = [], loading, onDelete, onView }) {
+function SavedRecipes({ savedRecipes = [], loading, onDelete, onView, onCreateNew }) {
   return (
     <div className="saved-items-container">
       <div className="saved-items-header">
@@ -10,10 +10,16 @@ function SavedRecipes({ savedRecipes = [], loading, onDelete, onView }) {
       
       {loading ? (
         <div className="loading">Loading saved recipes...</div>
-      ) : !savedRecipes || savedRecipes.length === 0 ? (
-        <p className="empty-message">No saved recipes yet. Generate and save a recipe to see it here!</p>
       ) : (
         <div className="saved-items-grid">
+          {/* Create New Recipe Placeholder */}
+          <div className="saved-item-card create-new-card" onClick={onCreateNew}>
+            <div className="create-new-content">
+              <span className="create-new-icon">+</span>
+              <span className="create-new-text">Create new recipe</span>
+            </div>
+          </div>
+          
           {savedRecipes.map((item) => (
             <div key={item.key} className="saved-item-card">
               <div className="saved-item-header">
