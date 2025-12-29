@@ -2,7 +2,7 @@
   "user_settings": {
     "user_settings": [
       {
-        "dietary_preference": "vegetarian",
+        "dietary_preference": "no added sugar",
         "order_of_importance": "Required",
         "generated_by": "user"
       },
@@ -17,7 +17,7 @@
         "generated_by": "user"
       },
       {
-        "dietary_preference": "low sodium",
+        "dietary_preference": "all food should be made from scratch as much as possible",
         "order_of_importance": "Preferred",
         "generated_by": "user"
       }

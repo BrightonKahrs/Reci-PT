@@ -18,12 +18,100 @@ function App() {
   const [newRequiredPref, setNewRequiredPref] = useState('')
   const [newPreferredPref, setNewPreferredPref] = useState('')
 
+  // Saved items state
+  const [savedRecipes, setSavedRecipes] = useState([])
+  const [savedMealPlans, setSavedMealPlans] = useState([])
+  const [savedItemsLoading, setSavedItemsLoading] = useState(false)
+
   // Load settings when Settings tab is active
   useEffect(() => {
     if (activeTab === 'settings') {
       loadSettings()
     }
   }, [activeTab])
+
+  // Load saved recipes and meal plans on mount and when switching to recipe/plan tabs
+  useEffect(() => {
+    loadSavedItems()
+  }, [])
+
+  const loadSavedItems = async () => {
+    setSavedItemsLoading(true)
+    try {
+      const [recipesRes, mealPlansRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/recipe/`),
+        fetch(`${API_BASE_URL}/meal-plan/`)
+      ])
+      
+      if (recipesRes.ok) {
+        const recipesData = await recipesRes.json()
+        setSavedRecipes(recipesData.recipes || [])
+      }
+      
+      if (mealPlansRes.ok) {
+        const mealPlansData = await mealPlansRes.json()
+        setSavedMealPlans(mealPlansData.meal_plans || [])
+      }
+    } catch (err) {
+      console.error('Failed to load saved items:', err)
+    } finally {
+      setSavedItemsLoading(false)
+    }
+  }
+
+  const deleteRecipe = async (key) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipe/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        setSavedRecipes(savedRecipes.filter(r => r.key !== key))
+      }
+    } catch (err) {
+      console.error('Failed to delete recipe:', err)
+    }
+  }
+
+  const deleteMealPlan = async (key) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        setSavedMealPlans(savedMealPlans.filter(m => m.key !== key))
+      }
+    } catch (err) {
+      console.error('Failed to delete meal plan:', err)
+    }
+  }
+
+  const saveCurrentRecipe = async () => {
+    if (!recipe) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipe/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe })
+      })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save recipe:', err)
+    }
+  }
+
+  const saveCurrentMealPlan = async () => {
+    if (!recipePlan) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe_plan: recipePlan })
+      })
+      if (response.ok) {
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save meal plan:', err)
+    }
+  }
 
   const loadSettings = async () => {
     setSettingsLoading(true)
@@ -334,13 +422,14 @@ function App() {
           </div>
         )}
 
-        {recipe && (
+        {activeTab === 'recipe' && recipe && (
           <div className="recipe-container">
             <div className="recipe-header">
               <h2>{recipe.title}</h2>
               <div className="recipe-meta">
                 <span className="complexity">{recipe.complexity}</span>
                 <span className="dietary">{recipe.dietary_preferences}</span>
+                <button className="save-btn" onClick={saveCurrentRecipe}>💾 Save Recipe</button>
               </div>
             </div>
 
@@ -395,11 +484,60 @@ function App() {
           </div>
         )}
 
+        {/* My Saved Recipes Section */}
+        {activeTab === 'recipe' && (
+          <div className="saved-items-container">
+            <div className="saved-items-header">
+              <h2>📚 My Saved Recipes</h2>
+              <span className="item-count">{savedRecipes.length} recipes</span>
+            </div>
+            
+            {savedItemsLoading ? (
+              <div className="loading">Loading saved recipes...</div>
+            ) : savedRecipes.length === 0 ? (
+              <p className="empty-message">No saved recipes yet. Generate and save a recipe to see it here!</p>
+            ) : (
+              <div className="saved-items-grid">
+                {savedRecipes.map((item) => (
+                  <div key={item.key} className="saved-item-card">
+                    <div className="saved-item-header">
+                      <h4>{item.recipe.title}</h4>
+                      <button 
+                        className="delete-btn" 
+                        onClick={() => deleteRecipe(item.key)}
+                        title="Delete recipe"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <p className="saved-item-description">{item.recipe.description}</p>
+                    <div className="saved-item-meta">
+                      <span className="complexity">{item.recipe.complexity}</span>
+                      <span className="servings">🍽️ {item.recipe.number_of_servings} servings</span>
+                    </div>
+                    <button 
+                      className="load-btn"
+                      onClick={() => setRecipe(item.recipe)}
+                    >
+                      View Recipe
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'plan' && (
           <div className="recipe-plan-container">
             <div className="plan-header">
               <h2>📅 Your Weekly Meal Plan</h2>
-              <p className="plan-count">{recipePlan ? `${recipePlan.length} meals planned` : 'Plan your week'}</p>
+              <div className="plan-header-right">
+                <p className="plan-count">{recipePlan ? `${recipePlan.length} meals planned` : 'Plan your week'}</p>
+                {recipePlan && (
+                  <button className="save-btn" onClick={saveCurrentMealPlan}>💾 Save Plan</button>
+                )}
+              </div>
             </div>
             
             <div className="weekly-grid">
@@ -449,6 +587,56 @@ function App() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* My Saved Meal Plans Section */}
+        {activeTab === 'plan' && (
+          <div className="saved-items-container">
+            <div className="saved-items-header">
+              <h2>📋 My Saved Meal Plans</h2>
+              <span className="item-count">{savedMealPlans.length} plans</span>
+            </div>
+            
+            {savedItemsLoading ? (
+              <div className="loading">Loading saved meal plans...</div>
+            ) : savedMealPlans.length === 0 ? (
+              <p className="empty-message">No saved meal plans yet. Generate and save a meal plan to see it here!</p>
+            ) : (
+              <div className="saved-items-grid">
+                {savedMealPlans.map((item) => (
+                  <div key={item.key} className="saved-item-card meal-plan-card">
+                    <div className="saved-item-header">
+                      <h4>Meal Plan</h4>
+                      <button 
+                        className="delete-btn" 
+                        onClick={() => deleteMealPlan(item.key)}
+                        title="Delete meal plan"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <p className="saved-item-description">
+                      {item.meal_plan.recipe_plan?.length || 0} meals planned
+                    </p>
+                    <div className="saved-item-meals">
+                      {item.meal_plan.recipe_plan?.slice(0, 3).map((meal, idx) => (
+                        <span key={idx} className="meal-preview">{meal.recipe_title}</span>
+                      ))}
+                      {(item.meal_plan.recipe_plan?.length || 0) > 3 && (
+                        <span className="meal-preview more">+{item.meal_plan.recipe_plan.length - 3} more</span>
+                      )}
+                    </div>
+                    <button 
+                      className="load-btn"
+                      onClick={() => setRecipePlan(item.meal_plan.recipe_plan)}
+                    >
+                      View Plan
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>

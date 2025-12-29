@@ -98,17 +98,27 @@ async def delete_recipe(recipe_key: str, state_store: StateStore = Depends(get_s
 
 @router.get("/")
 async def list_recipes(state_store: StateStore = Depends(get_state_store)) -> dict:
-    """Endpoint to list all saved recipe keys in the state store"""
+    """Endpoint to list all saved recipes with their full data"""
     
     try:
         # List all recipe keys
         recipe_keys = await state_store.list(prefix="recipe:")
         
-        logger.info(f"Listed {len(recipe_keys)} recipes")
+        # Fetch full data for each recipe
+        recipes = []
+        for key in recipe_keys:
+            recipe_data = await state_store.get(key)
+            if recipe_data:
+                recipes.append({
+                    "key": key,
+                    "recipe": recipe_data
+                })
+        
+        logger.info(f"Listed {len(recipes)} recipes")
         
         return {
             "status": "success",
-            "recipe_keys": recipe_keys
+            "recipes": recipes
         }
     except Exception as e:
         logger.error(f"Error listing recipes: {e}")

@@ -97,17 +97,27 @@ async def delete_meal_plan(meal_plan_key: str, state_store: StateStore = Depends
 
 @router.get("/")
 async def list_meal_plans(state_store: StateStore = Depends(get_state_store)) -> dict:
-    """Endpoint to list all saved meal plan keys in the state store"""
+    """Endpoint to list all saved meal plans with their full data"""
     
     try:
         # List all meal plan keys
         meal_plan_keys = await state_store.list(prefix="meal_plan:")
         
-        logger.info(f"Listed {len(meal_plan_keys)} meal plans")
+        # Fetch full data for each meal plan
+        meal_plans = []
+        for key in meal_plan_keys:
+            meal_plan_data = await state_store.get(key)
+            if meal_plan_data:
+                meal_plans.append({
+                    "key": key,
+                    "meal_plan": meal_plan_data
+                })
+        
+        logger.info(f"Listed {len(meal_plans)} meal plans")
         
         return {
             "status": "success",
-            "meal_plan_keys": meal_plan_keys
+            "meal_plans": meal_plans
         }
     except Exception as e:
         logger.error(f"Error listing meal plans: {e}")
