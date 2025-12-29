@@ -18,6 +18,7 @@ function App() {
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
   const [chatInputValue, setChatInputValue] = useState('')
+  const [recipeStatus, setRecipeStatus] = useState('draft') // 'draft' or 'saved'
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -90,6 +91,7 @@ function App() {
         body: JSON.stringify({ recipe: recipe })
       })
       if (response.ok) {
+        setRecipeStatus('saved')
         loadSavedItems()
       }
     } catch (err) {
@@ -215,7 +217,10 @@ function App() {
                 <RecipeDisplay 
                   recipe={recipe} 
                   onSave={saveCurrentRecipe} 
+                  onUpdate={setRecipe}
                   isCreating={isCreatingRecipe}
+                  status={recipeStatus}
+                  onStatusChange={setRecipeStatus}
                 />
                 <SavedRecipes 
                   savedRecipes={savedRecipes}
@@ -224,6 +229,7 @@ function App() {
                   onView={(r) => {
                     setRecipe(r)
                     setIsCreatingRecipe(false)
+                    setRecipeStatus('saved')
                   }}
                   onCreateNew={() => {
                     setRecipe(null)
@@ -274,6 +280,7 @@ function App() {
                 onRecipeGenerated={(recipe) => {
                   setRecipe(recipe)
                   setIsCreatingRecipe(false)
+                  setRecipeStatus('draft')
                   setLeftTab('recipe')
                 }}
                 onMealPlanGenerated={(mealPlan) => {
