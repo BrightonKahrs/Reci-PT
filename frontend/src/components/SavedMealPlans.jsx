@@ -1,0 +1,54 @@
+import React from 'react'
+
+function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
+  return (
+    <div className="saved-items-container">
+      <div className="saved-items-header">
+        <h2>📋 My Saved Meal Plans</h2>
+        <span className="item-count">{savedMealPlans?.length || 0} plans</span>
+      </div>
+      
+      {loading ? (
+        <div className="loading">Loading saved meal plans...</div>
+      ) : !savedMealPlans || savedMealPlans.length === 0 ? (
+        <p className="empty-message">No saved meal plans yet. Generate and save a meal plan to see it here!</p>
+      ) : (
+        <div className="saved-items-grid">
+          {savedMealPlans.map((item) => (
+            <div key={item.key} className="saved-item-card meal-plan-card">
+              <div className="saved-item-header">
+                <h4>Meal Plan</h4>
+                <button 
+                  className="delete-btn" 
+                  onClick={() => onDelete(item.key)}
+                  title="Delete meal plan"
+                >
+                  🗑️
+                </button>
+              </div>
+              <p className="saved-item-description">
+                {item.meal_plan.recipe_plan?.length || 0} meals planned
+              </p>
+              <div className="saved-item-meals">
+                {item.meal_plan.recipe_plan?.slice(0, 3).map((meal, idx) => (
+                  <span key={idx} className="meal-preview">{meal.recipe_title}</span>
+                ))}
+                {(item.meal_plan.recipe_plan?.length || 0) > 3 && (
+                  <span className="meal-preview more">+{item.meal_plan.recipe_plan.length - 3} more</span>
+                )}
+              </div>
+              <button 
+                className="load-btn"
+                onClick={() => onView(item.meal_plan.recipe_plan)}
+              >
+                View Plan
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default SavedMealPlans
