@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, APIRouter, Depends
 from pydantic import BaseModel
 
+from ai.agents.chat_agent import ChatAgent
 from ai.agents.meal_plan_agent import MealPlanAgent
 from ai.agents.recipe_agent import RecipeAgent
 from models.response import RecipeInput, RecipeOutput
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai", tags=["AI Endpoints"])
 
 state_store = get_state_store()
+chat_agent = ChatAgent(state_store=state_store)
 recipe_agent = RecipeAgent(state_store=state_store)
 meal_plan_agent = MealPlanAgent(state_store=state_store)
 
@@ -32,16 +34,15 @@ class ChatOutput(BaseModel):
 async def chat(request: ChatInput) -> ChatOutput:
     """Endpoint for general chat with the AI assistant"""
     
-    await recipe_agent.start()
+    await chat_agent.start()
     try:
-        # Use the recipe agent for general cooking chat
-        response = await recipe_agent.chat(user_message=request.message)
+        response = await chat_agent.chat(user_message=request.message)
         return ChatOutput(response=response)
     except Exception as e:
         logger.error(f"Error in chat: {e}")
         raise HTTPException(status_code=500, detail="Failed to process chat message")
     finally:
-        await recipe_agent.stop()
+        await chat_agent.stop()
 
 
 @router.post("/generate-recipe", response_model=RecipeOutput)

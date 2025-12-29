@@ -16,34 +16,6 @@ class RecipeAgent(BaseAgent):
     def __init__(self, state_store: StateStore):
         super().__init__(agent_name="RecipeAgent", state_store=state_store)
         
-    async def chat(self, user_message: str) -> str:
-        """General chat about cooking, recipes, and ingredients
-        
-        Args:
-            user_message (str): The user's chat message
-            
-        Returns:
-            str: The AI assistant's response
-        """
-        
-        self._ensure_client()
-        
-        if not self._client:
-            raise RuntimeError("RecipeAgent not started. Call start() first.")
-        
-        # Create agent with chat-focused system instructions
-        agent = self._client.create_agent(
-            id="RecipeChatAgent", 
-            instructions=self._build_chat_instructions(),
-            tools=[],
-        )
-
-        if not self._thread:
-            self._thread = agent.get_new_thread()
-
-        result = await agent.run(user_message, thread=self._thread)
-        return result.text
-        
     async def generate_recipe(self, user_query: str) -> Recipe:
         """Generates a recipe based on the user's natural language query
 
@@ -80,23 +52,6 @@ class RecipeAgent(BaseAgent):
         logger.info(f"Generated Recipe: {result.text}")
         # Parse the JSON response into Pydantic model
         return Recipe.model_validate_json(result.text)
-    
-    def _build_chat_instructions(self) -> str:
-        """Build system instructions for general cooking chat"""
-        
-        return """You are a friendly and knowledgeable AI cooking assistant. You can help users with:
-            
-            - Answering questions about cooking techniques and methods
-            - Suggesting ingredient substitutions
-            - Explaining how to prepare specific dishes
-            - Providing tips for meal planning
-            - Discussing nutrition and dietary considerations
-            - Recommending cooking equipment and tools
-            - Sharing food storage and safety tips
-            
-            Be conversational, helpful, and encouraging. Keep responses concise but informative.
-            If a user asks you to generate a full recipe, let them know they can use the 
-            "Generate Recipe" tab for a detailed, formatted recipe."""
     
     def _build_user_message(self, user_query: str, preferences: str) -> str:
         """Build user message with preferences context"""
