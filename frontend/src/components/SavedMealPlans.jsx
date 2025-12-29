@@ -1,6 +1,6 @@
 import React from 'react'
 
-function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
+function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCreateNew }) {
   return (
     <div className="saved-items-container">
       <div className="saved-items-header">
@@ -10,17 +10,24 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
       
       {loading ? (
         <div className="loading">Loading saved meal plans...</div>
-      ) : !savedMealPlans || savedMealPlans.length === 0 ? (
-        <p className="empty-message">No saved meal plans yet. Generate and save a meal plan to see it here!</p>
       ) : (
         <div className="saved-items-grid">
+          {/* Create New Card - Always First */}
+          <div className="saved-item-card create-new-card" onClick={onCreateNew}>
+            <div className="create-new-icon">+</div>
+            <p>Create new meal plan</p>
+          </div>
+          
           {savedMealPlans.map((item) => (
             <div key={item.key} className="saved-item-card meal-plan-card">
               <div className="saved-item-header">
                 <h4>Meal Plan</h4>
                 <button 
                   className="delete-btn" 
-                  onClick={() => onDelete(item.key)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(item.key)
+                  }}
                   title="Delete meal plan"
                 >
                   🗑️

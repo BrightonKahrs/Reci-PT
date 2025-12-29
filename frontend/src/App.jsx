@@ -17,8 +17,10 @@ function App() {
   const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
+  const [isCreatingMealPlan, setIsCreatingMealPlan] = useState(false)
   const [chatInputValue, setChatInputValue] = useState('')
   const [recipeStatus, setRecipeStatus] = useState('draft') // 'draft' or 'saved'
+  const [mealPlanStatus, setMealPlanStatus] = useState('draft') // 'draft' or 'saved'
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -108,6 +110,7 @@ function App() {
         body: JSON.stringify({ recipe_plan: recipePlan })
       })
       if (response.ok) {
+        setMealPlanStatus('saved')
         loadSavedItems()
       }
     } catch (err) {
@@ -221,6 +224,10 @@ function App() {
                   isCreating={isCreatingRecipe}
                   status={recipeStatus}
                   onStatusChange={setRecipeStatus}
+                  onCancel={() => {
+                    setRecipe(null)
+                    setIsCreatingRecipe(false)
+                  }}
                 />
                 <SavedRecipes 
                   savedRecipes={savedRecipes}
@@ -243,12 +250,37 @@ function App() {
 
             {leftTab === 'plan' && (
               <>
-                <MealPlanDisplay recipePlan={recipePlan} onSave={saveCurrentMealPlan} />
+                <MealPlanDisplay 
+                  recipePlan={recipePlan} 
+                  onSave={saveCurrentMealPlan}
+                  onUpdate={(plan) => {
+                    setRecipePlan(plan)
+                    setMealPlanStatus('draft')
+                  }}
+                  isCreating={isCreatingMealPlan}
+                  status={mealPlanStatus}
+                  onStatusChange={setMealPlanStatus}
+                  onCancel={() => {
+                    setRecipePlan(null)
+                    setIsCreatingMealPlan(false)
+                  }}
+                  savedRecipes={savedRecipes}
+                />
                 <SavedMealPlans 
                   savedMealPlans={savedMealPlans}
                   loading={savedItemsLoading}
                   onDelete={deleteMealPlan}
-                  onView={setRecipePlan}
+                  onView={(plan) => {
+                    setRecipePlan(plan)
+                    setIsCreatingMealPlan(false)
+                    setMealPlanStatus('saved')
+                  }}
+                  onCreateNew={() => {
+                    setRecipePlan(null)
+                    setIsCreatingMealPlan(true)
+                    setChatInputValue('@mealplan_agent ')
+                    setRightTab('chat')
+                  }}
                 />
               </>
             )}
@@ -285,6 +317,8 @@ function App() {
                 }}
                 onMealPlanGenerated={(mealPlan) => {
                   setRecipePlan(mealPlan)
+                  setIsCreatingMealPlan(false)
+                  setMealPlanStatus('draft')
                   setLeftTab('plan')
                 }}
               />

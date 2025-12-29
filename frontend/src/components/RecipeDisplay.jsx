@@ -16,7 +16,7 @@ const BLANK_RECIPE = {
   }
 }
 
-function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft', onStatusChange }) {
+function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedRecipe, setEditedRecipe] = useState(null)
 
@@ -110,9 +110,9 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
     if (recipe) {
       setEditedRecipe(JSON.parse(JSON.stringify(recipe)))
       setIsEditing(false)
-    } else {
-      // Reset to blank if creating new
-      setEditedRecipe(JSON.parse(JSON.stringify(BLANK_RECIPE)))
+    } else if (onCancel) {
+      // Close the new recipe template
+      onCancel()
     }
   }
 
@@ -168,7 +168,7 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
             {showEditMode ? (
               <>
                 <button className="save-btn" onClick={handleSaveEdits}>✓ Done</button>
-                {!isNewRecipe && <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>}
+                <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
               </>
             ) : (
               <>
