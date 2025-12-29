@@ -12,11 +12,8 @@ import {
 const API_BASE_URL = 'http://localhost:8000'
 
 function App() {
-  const [query, setQuery] = useState('')
   const [recipe, setRecipe] = useState(null)
   const [recipePlan, setRecipePlan] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
@@ -87,10 +84,10 @@ function App() {
   const saveCurrentRecipe = async () => {
     if (!recipe) return
     try {
-      const response = await fetch(`${API_BASE_URL}/recipe/`, {
+      const response = await fetch(`${API_BASE_URL}/recipe/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(recipe)
+        body: JSON.stringify({ recipe: recipe })
       })
       if (response.ok) {
         loadSavedItems()
@@ -103,7 +100,7 @@ function App() {
   const saveCurrentMealPlan = async () => {
     if (!recipePlan) return
     try {
-      const response = await fetch(`${API_BASE_URL}/meal-plan/`, {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recipe_plan: recipePlan })
@@ -187,44 +184,6 @@ function App() {
       .map(p => p.dietary_preference)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!query.trim()) return
-    
-    setLoading(true)
-    setError(null)
-
-    try {
-      const endpoint = leftTab === 'recipe' 
-        ? 'http://localhost:8000/ai/generate-recipe'
-        : 'http://localhost:8000/ai/generate-meal-plan'
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: query }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate')
-      }
-      
-      const data = await response.json()
-      
-      if (leftTab === 'recipe') {
-        setRecipe(data.recipe)
-      } else {
-        setRecipePlan(data.recipe_plan)
-      }
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="app">
       <header className="header">
@@ -251,28 +210,6 @@ function App() {
           </div>
 
           <div className="panel-content">
-            <form onSubmit={handleSubmit} className="query-form">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={leftTab === 'recipe' 
-                  ? "What recipe would you like? E.g., 'Healthy pasta with vegetables'" 
-                  : "What kind of meal plan? E.g., 'Healthy week with quick dinners'"
-                }
-                className="query-input"
-              />
-              <button type="submit" disabled={loading} className="generate-btn">
-                {loading ? 'Generating...' : `Generate ${leftTab === 'recipe' ? 'Recipe' : 'Meal Plan'}`}
-              </button>
-            </form>
-
-            {error && (
-              <div className="error-message">
-                ⚠️ {error}
-              </div>
-            )}
-
             {leftTab === 'recipe' && (
               <>
                 <RecipeDisplay 
