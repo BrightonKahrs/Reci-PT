@@ -9,6 +9,10 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
   const displayPlan = recipePlan || []
   const isEditable = isCreating || status === 'draft'
 
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const mealTypes = ['breakfast', 'lunch', 'snack', 'dinner']
+
   const handleCellClick = (day, mealType) => {
     if (!isEditable) return
     setSelectingCell({ day, mealType })
@@ -54,6 +58,13 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
     }
   }
 
+  const getMeal = (day, mealType) => {
+    return displayPlan?.find(p => 
+      p.meal_type === mealType && 
+      (Array.isArray(p.meal_day) ? p.meal_day.includes(day) : p.meal_day === day)
+    )
+  }
+
   return (
     <div className="recipe-plan-container">
       <div className={`recipe-status-tag ${status}`}>
@@ -62,91 +73,75 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
       <div className="plan-header">
         <h2>📅 {isCreating && !recipePlan ? 'New Meal Plan' : 'Your Weekly Meal Plan'}</h2>
         <div className="plan-header-right">
-          {isCreating && !recipePlan ? (
-            <p className="plan-hint">Click + to add recipes or use @mealplan_agent in chat</p>
-          ) : (
-            <p className="plan-count">{displayPlan.length} meals planned</p>
-          )}
+          <p className="plan-count">{displayPlan.length} meals</p>
           <div className="plan-actions">
             {displayPlan.length > 0 && (
-              <button className="save-btn" onClick={onSave}>💾 Save Plan</button>
+              <button className="save-btn" onClick={onSave}>💾 Save</button>
             )}
             {isCreating && (
-              <button className="cancel-btn" onClick={onCancel}>✕ Cancel</button>
+              <button className="cancel-btn" onClick={onCancel}>✕</button>
             )}
           </div>
         </div>
       </div>
       
-      <div className="weekly-grid">
-        <div className="weekly-grid-header">
-          <div className="meal-type-label"></div>
-          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
-            <div key={day} className="day-header">{day}</div>
+      {/* Compact Grid - Days as rows, Meal types as columns */}
+      <div className="meal-plan-grid">
+        {/* Header row with meal types */}
+        <div className="meal-plan-header">
+          <div className="day-label-cell"></div>
+          {mealTypes.map(type => (
+            <div key={type} className={`meal-type-header ${type}`}>
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </div>
           ))}
         </div>
         
-        {['breakfast', 'lunch', 'snack', 'dinner'].map(mealType => (
-          <div key={mealType} className="meal-row">
-            <div className="meal-type-label">
-              <span className={`meal-badge ${mealType}`}>
-                {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
-              </span>
+        {/* Day rows */}
+        {days.map((day, dayIndex) => (
+          <div key={day} className="meal-plan-row">
+            <div className="day-label-cell">
+              <span className="day-label">{dayLabels[dayIndex]}</span>
             </div>
             
-            {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => {
-              const plan = displayPlan?.find(p => 
-                p.meal_type === mealType && 
-                (Array.isArray(p.meal_day) ? p.meal_day.includes(day) : p.meal_day === day)
-              )
+            {mealTypes.map(mealType => {
+              const meal = getMeal(day, mealType)
               const isSelecting = selectingCell?.day === day && selectingCell?.mealType === mealType
               
               return (
                 <div 
-                  key={`${day}-${mealType}`} 
-                  className={`meal-cell ${plan ? 'filled' : 'empty'} ${isEditable && !plan ? 'editable' : ''} ${isSelecting ? 'selecting' : ''}`}
-                  onClick={() => !plan && handleCellClick(day, mealType)}
+                  key={`${day}-${mealType}`}
+                  className={`meal-plan-cell ${meal ? 'filled' : 'empty'} ${isEditable && !meal ? 'editable' : ''} ${isSelecting ? 'selecting' : ''}`}
+                  onClick={() => !meal && handleCellClick(day, mealType)}
                 >
-                  {plan ? (
-                    <>
-                      <div className="meal-title">{plan.recipe_title}</div>
-                      {plan.servings && (
-                        <div className="meal-servings">🍽️ {plan.servings}</div>
-                      )}
-                      {plan.estimated_macros && (
-                        <div className="meal-macros">
-                          <span>{plan.estimated_macros.calories} cal</span>
-                          <span>P: {plan.estimated_macros.protein}g</span>
-                        </div>
-                      )}
+                  {meal ? (
+                    <div className="meal-content">
+                      <span className="meal-name" title={meal.recipe_title}>
+                        {meal.recipe_title}
+                      </span>
                       {isEditable && (
                         <button 
                           className="remove-meal-btn" 
                           onClick={(e) => handleRemoveMeal(day, mealType, e)}
-                          title="Remove meal"
                         >
                           ×
                         </button>
                       )}
-                    </>
-                  ) : isEditable ? (
-                    <div className="add-meal-placeholder">
-                      <span className="add-meal-icon">+</span>
                     </div>
-                  ) : (
-                    <div className="empty-placeholder">-</div>
-                  )}
+                  ) : isEditable ? (
+                    <span className="add-icon">+</span>
+                  ) : null}
                   
                   {/* Recipe Selection Dropdown */}
                   {isSelecting && (
                     <div className="recipe-select-dropdown">
                       <div className="recipe-select-header">
-                        <span>Select a recipe</span>
+                        <span>Select recipe</span>
                         <button onClick={(e) => { e.stopPropagation(); setSelectingCell(null); }}>×</button>
                       </div>
                       <div className="recipe-select-list">
                         {savedRecipes.length === 0 ? (
-                          <div className="recipe-select-empty">No saved recipes yet</div>
+                          <div className="recipe-select-empty">No saved recipes</div>
                         ) : (
                           savedRecipes.map((item, idx) => (
                             <div 
@@ -154,8 +149,7 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
                               className="recipe-select-item"
                               onClick={(e) => { e.stopPropagation(); handleRecipeSelect(item.recipe); }}
                             >
-                              <span className="recipe-select-title">{item.recipe.title}</span>
-                              <span className="recipe-select-meta">{item.recipe.complexity}</span>
+                              {item.recipe.title}
                             </div>
                           ))
                         )}
@@ -168,6 +162,10 @@ function MealPlanDisplay({ recipePlan, onSave, onUpdate, isCreating, status = 'd
           </div>
         ))}
       </div>
+      
+      {isEditable && (
+        <p className="plan-hint">Click + to add recipes or use @mealplan_agent in chat</p>
+      )}
     </div>
   )
 }

@@ -621,9 +621,11 @@
 }
 
 .plan-hint {
-  font-size: 0.85rem;
-  color: #3498db;
+  font-size: 0.8rem;
+  color: #7f8c8d;
   font-style: italic;
+  text-align: center;
+  margin-top: 0.75rem;
 }
 
 .plan-actions {
@@ -631,176 +633,157 @@
   gap: 0.5rem;
 }
 
-/* Weekly Grid Layout */
-.weekly-grid {
+/* Compact Meal Plan Grid - Days as rows, Meal types as columns */
+.meal-plan-grid {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: max-content;
-  flex: 1;
+  gap: 2px;
 }
 
-.weekly-grid-header {
+.meal-plan-header {
   display: grid;
-  grid-template-columns: 100px repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  flex-shrink: 0;
+  grid-template-columns: 50px repeat(4, 1fr);
+  gap: 2px;
 }
 
-.day-header {
+.meal-type-header {
   text-align: center;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #2c3e50;
-  padding: 0.6rem 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.25rem;
   color: white;
-  border-radius: 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 
-.meal-row {
+.meal-type-header.breakfast { background: #f39c12; }
+.meal-type-header.lunch { background: #3498db; }
+.meal-type-header.snack { background: #9b59b6; }
+.meal-type-header.dinner { background: #e74c3c; }
+
+.meal-plan-row {
   display: grid;
-  grid-template-columns: 100px repeat(7, 1fr);
-  gap: 0.5rem;
-  min-height: 70px;
-  align-items: stretch;
+  grid-template-columns: 50px repeat(4, 1fr);
+  gap: 2px;
 }
 
-.meal-row:last-child {
-  margin-bottom: 0;
-}
-
-.meal-type-label {
+.day-label-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem;
-  height: 100%;
-  overflow: hidden;
+  padding: 0.25rem;
 }
 
-.meal-type-label .meal-badge {
-  width: 100%;
-  text-align: center;
-  padding: 0.5rem;
-  font-size: 0.85rem;
+.day-label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #666;
 }
 
-.meal-cell {
+.meal-plan-cell {
   background: #f8f9fa;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 0.3rem;
-  transition: all 0.3s;
-  overflow: visible;
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.35rem;
+  min-height: 36px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-.meal-cell.filled {
+.meal-plan-cell.filled {
   background: white;
   border-color: #3498db;
 }
 
-.meal-cell.filled:hover {
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
-}
-
-.meal-cell.empty {
-  opacity: 0.5;
-}
-
-.meal-cell.editable {
-  opacity: 1;
+.meal-plan-cell.editable {
   cursor: pointer;
   border-style: dashed;
+  border-color: #ccc;
 }
 
-.meal-cell.editable:hover {
+.meal-plan-cell.editable:hover {
   border-color: #3498db;
   background: #f0f7ff;
 }
 
-.meal-cell.selecting {
+.meal-plan-cell.selecting {
   border-color: #3498db;
   border-style: solid;
   z-index: 10;
 }
 
-.add-meal-placeholder {
+.meal-content {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  min-height: 40px;
+  gap: 4px;
 }
 
-.add-meal-icon {
-  font-size: 1.5rem;
-  color: #bdc3c7;
+.meal-name {
+  flex: 1;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meal-plan-cell .add-icon {
+  font-size: 1rem;
+  color: #ccc;
   font-weight: 300;
-  transition: all 0.2s;
 }
 
-.meal-cell.editable:hover .add-meal-icon {
+.meal-plan-cell.editable:hover .add-icon {
   color: #3498db;
-  transform: scale(1.2);
 }
 
-.remove-meal-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 18px;
-  height: 18px;
+.meal-plan-cell .remove-meal-btn {
+  position: static;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
   border-radius: 50%;
   border: none;
   background: #e74c3c;
   color: white;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.meal-cell.filled:hover .remove-meal-btn {
+.meal-plan-cell.filled:hover .remove-meal-btn {
   opacity: 1;
 }
 
-.remove-meal-btn:hover {
-  background: #c0392b;
-}
-
 /* Recipe Selection Dropdown */
-.recipe-select-dropdown {
+.meal-plan-cell .recipe-select-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
-  right: 0;
-  min-width: 200px;
+  min-width: 180px;
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 100;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .recipe-select-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.5rem;
   border-bottom: 1px solid #e0e0e0;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #666;
 }
@@ -808,54 +791,42 @@
 .recipe-select-header button {
   background: none;
   border: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   color: #999;
   padding: 0;
   line-height: 1;
 }
 
-.recipe-select-header button:hover {
-  color: #333;
-}
-
 .recipe-select-list {
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: auto;
 }
 
 .recipe-select-item {
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.5rem;
   cursor: pointer;
+  font-size: 0.75rem;
   border-bottom: 1px solid #f0f0f0;
-  transition: background 0.15s;
-}
-
-.recipe-select-item:last-child {
-  border-bottom: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .recipe-select-item:hover {
   background: #f0f7ff;
 }
 
-.recipe-select-title {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.recipe-select-meta {
-  font-size: 0.7rem;
-  color: #999;
-}
-
 .recipe-select-empty {
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: center;
   color: #999;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+}
+
+/* Legacy grid styles - keep for backward compatibility */
+.weekly-grid {
+  display: none;
 }
 
 .empty-placeholder {
