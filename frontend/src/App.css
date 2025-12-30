@@ -1032,6 +1032,20 @@
   overflow: hidden;
 }
 
+.meal-item.clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.meal-item.clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.meal-item.clickable:active {
+  transform: scale(0.98);
+}
+
 .meal-item-header {
   display: flex;
   align-items: center;
