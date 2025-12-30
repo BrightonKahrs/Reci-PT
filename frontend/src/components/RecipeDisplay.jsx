@@ -21,12 +21,13 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
   const [editedRecipe, setEditedRecipe] = useState(null)
 
   useEffect(() => {
-    if (recipe) {
+    if (isCreating) {
+      // Creating new recipe - use provided recipe data or blank
+      setEditedRecipe(recipe ? JSON.parse(JSON.stringify(recipe)) : JSON.parse(JSON.stringify(BLANK_RECIPE)))
+      setIsEditing(true)
+    } else if (recipe) {
       setEditedRecipe(JSON.parse(JSON.stringify(recipe)))
       setIsEditing(false)
-    } else if (isCreating) {
-      setEditedRecipe(JSON.parse(JSON.stringify(BLANK_RECIPE)))
-      setIsEditing(true)
     }
   }, [recipe, isCreating])
 

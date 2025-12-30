@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const MEAL_TIMES = ['Breakfast', 'Lunch', 'Snack', 'Dinner']
 
-function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [] }) {
+function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [], onOpenRecipe }) {
   const [activeCell, setActiveCell] = useState(null) // { day, mealTime, rect }
   const [isEditing, setIsEditing] = useState(false)
   const [editedMealPlan, setEditedMealPlan] = useState(null)
@@ -228,7 +228,16 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                         const macros = meal.nutritional_info || {}
                         const isDraft = !meal.recipe_id || meal.recipe_id === 'recipe:draft' || meal.recipe_id.endsWith(':draft')
                         return (
-                          <div key={idx} className={`meal-item ${isDraft ? 'draft' : ''}`}>
+                          <div 
+                            key={idx} 
+                            className={`meal-item ${isDraft ? 'draft' : ''} clickable`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (onOpenRecipe) {
+                                onOpenRecipe(meal, isDraft)
+                              }
+                            }}
+                          >
                             <div className="meal-item-header">
                               <span className="meal-name" title={meal.title}>
                                 {meal.title}

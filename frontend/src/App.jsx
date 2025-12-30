@@ -268,6 +268,34 @@ function App() {
                     setIsCreatingMealPlan(false)
                   }}
                   savedRecipes={savedRecipes}
+                  onOpenRecipe={(meal, isDraft) => {
+                    if (isDraft) {
+                      // Open as draft recipe to complete it
+                      setRecipe({
+                        title: meal.title,
+                        description: meal.description || '',
+                        dietary_preferences: meal.dietary_preferences || [],
+                        number_of_servings: meal.number_of_servings || 1,
+                        nutritional_info: meal.nutritional_info || { calories: 0, protein: 0, fat: 0, carbohydrates: 0 },
+                        complexity: meal.complexity || 'Easy',
+                        ingredients: [],
+                        instructions: []
+                      })
+                      setIsCreatingRecipe(true)
+                      setRecipeStatus('draft')
+                    } else {
+                      // Find and open the saved recipe
+                      const savedRecipe = savedRecipes.find(r => 
+                        r.recipe_id === meal.recipe_id || `recipe:${r.recipe_id}` === meal.recipe_id
+                      )
+                      if (savedRecipe) {
+                        setRecipe(savedRecipe)
+                        setIsCreatingRecipe(false)
+                        setRecipeStatus('saved')
+                      }
+                    }
+                    setLeftTab('recipe')
+                  }}
                 />
                 <SavedMealPlans 
                   savedMealPlans={savedMealPlans}
