@@ -3,6 +3,7 @@ import logging
 import uuid
 
 from models.meal_plan import MealPlan
+from models.route_endpoints import MealPlanInput
 from state.dependencies import get_state_store
 from state.store import StateStore
 
@@ -13,24 +14,31 @@ router = APIRouter(prefix="/meal-plan", tags=["Meal Plan Endpoints"])
 
 
 @router.post("/save")
-async def save_meal_plan(request: MealPlan, meal_plan_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
+async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to save a generated meal plan to the state store
     
     If meal_plan_key is provided, updates the existing meal plan.
-    Otherwise, creates a new meal plan with a generated GUID.
+    Otherwise uses meal_plan_id from request, or generates a new GUID.
     """
     
     try:
-        # Use provided key or generate a new one
+        # Determine the key: provided param > request.meal_plan_id > generate new
         if meal_plan_key:
             key = meal_plan_key
+            action = "updated"
+        elif request.meal_plan_id:
+            key = request.meal_plan_id
             action = "updated"
         else:
             key = f"meal_plan:{uuid.uuid4()}"
             action = "saved"
         
-        # Convert Pydantic model to dict for storage
-        meal_plan_data = request.model_dump()
+        # Build the full MealPlan with the ID
+        meal_plan_data = {
+            "meal_plan_id": key,
+            "meal_plan_title": request.meal_plan_title,
+            "recipe_plan": [slot.model_dump() for slot in request.recipe_plan]
+        }
         
         # Save to state store
         await state_store.set(key, meal_plan_data)

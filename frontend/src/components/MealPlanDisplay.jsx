@@ -41,6 +41,10 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
     if (onUpdate) {
       onUpdate(editedMealPlan)
     }
+    // Pass the edited meal plan directly to onSave since state update is async
+    if (onSave) {
+      onSave(editedMealPlan)
+    }
     setIsEditing(false)
   }
 
@@ -165,7 +169,7 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
             {showEditMode ? (
               <>
                 {(recipes.length > 0 || title) && (
-                  <button className="save-btn" onClick={() => { handleSaveEdits(); onSave(); }}>💾 Save</button>
+                  <button className="save-btn" onClick={handleSaveEdits}>💾 Save</button>
                 )}
                 <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
               </>

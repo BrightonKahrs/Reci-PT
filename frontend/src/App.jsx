@@ -101,16 +101,18 @@ function App() {
     }
   }
 
-  const saveCurrentMealPlan = async () => {
-    if (!mealPlan) return
+  const saveCurrentMealPlan = async (mealPlanToSave) => {
+    const planToSave = mealPlanToSave || mealPlan
+    if (!planToSave) return
     try {
       const response = await fetch(`${API_BASE_URL}/meal-plan/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mealPlan)
+        body: JSON.stringify(planToSave)
       })
       if (response.ok) {
         setMealPlanStatus('saved')
+        setIsCreatingMealPlan(false)
         loadSavedItems()
       }
     } catch (err) {
