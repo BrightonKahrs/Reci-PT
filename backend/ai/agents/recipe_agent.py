@@ -28,6 +28,23 @@ system_instructions= f"""
     - Parmesan cheese → Use nutritional yeast or vegan parmesan
     - Milk/cream → Use oat milk, coconut milk, or cashew cream
 
+    ## INGREDIENT FORMAT RULES
+    For each ingredient, you MUST provide:
+    - `name`: A universal, normalized name (e.g., "chicken breast" not "boneless skinless chicken breast")
+    - `quantity`: A numeric value (float) representing the amount
+    - `unit`: MUST be one of: "grams", "ml", or "units"
+      - Use "grams" for solid ingredients that can be weighed
+      - Use "ml" for liquids
+      - Use "units" for whole items that don't make sense to measure by weight/volume (e.g., 2 eggs, 1 avocado, 3 tortillas)
+    - `description`: Context about preparation or specifics (e.g., "diced", "canned, drained", "ripe", "minced")
+
+    ## INGREDIENT EXAMPLES
+    - {{"name": "chicken breast", "quantity": 500, "unit": "grams", "description": "boneless, skinless"}}
+    - {{"name": "olive oil", "quantity": 30, "unit": "ml", "description": "extra virgin"}}
+    - {{"name": "eggs", "quantity": 3, "unit": "units", "description": "large"}}
+    - {{"name": "garlic", "quantity": 2, "unit": "units", "description": "cloves, minced"}}
+    - {{"name": "black beans", "quantity": 400, "unit": "grams", "description": "canned, drained"}}
+
     ## RESPONSE FORMAT
     Respond ONLY with valid JSON matching this schema:
     {Recipe.model_json_schema()}

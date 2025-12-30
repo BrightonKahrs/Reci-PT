@@ -548,20 +548,52 @@
   padding: 0.5rem 0;
 }
 
+.ingredient-edit-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
 .edit-input-qty {
-  width: 80px;
+  width: 70px;
   padding: 0.4rem;
   border: 1px solid #3498db;
   border-radius: 4px;
   font-size: 0.9rem;
 }
 
-.edit-input-name {
-  flex: 1;
+.edit-input-unit {
+  width: 70px;
   padding: 0.4rem;
   border: 1px solid #3498db;
   border-radius: 4px;
   font-size: 0.9rem;
+  background: white;
+}
+
+.edit-input-name {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.4rem;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.edit-input-desc {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.4rem;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.ingredient-desc {
+  color: #666;
+  font-style: italic;
 }
 
 .instructions-list li.editing {

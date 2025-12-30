@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react'
 const BLANK_RECIPE = {
   title: '',
   description: '',
+  comments: '',
   complexity: 'Easy',
-  dietary_preferences: '',
-  ingredients: [{ quantity: '', name: '' }],
+  dietary_preferences: [],
+  ingredients: [{ name: '', quantity: 0, unit: 'grams', description: '' }],
   instructions: [{ step_number: 1, description: '' }],
   number_of_servings: 2,
   nutritional_info: {
@@ -65,7 +66,7 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
   const addIngredient = () => {
     setEditedRecipe(prev => ({
       ...prev,
-      ingredients: [...prev.ingredients, { quantity: '', name: '' }]
+      ingredients: [...prev.ingredients, { name: '', quantity: 0, unit: 'grams', description: '' }]
     }))
   }
 
@@ -284,14 +285,23 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
           {displayRecipe.ingredients?.map((ingredient, index) => (
             <li key={index} className={showEditMode ? 'editing' : ''}>
               {showEditMode ? (
-                <>
+                <div className="ingredient-edit-row">
                   <input
-                    type="text"
+                    type="number"
                     className="edit-input-qty"
                     value={editedRecipe.ingredients[index]?.quantity || ''}
-                    onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
+                    onChange={(e) => handleIngredientChange(index, 'quantity', parseFloat(e.target.value) || 0)}
                     placeholder="Qty"
                   />
+                  <select
+                    className="edit-input-unit"
+                    value={editedRecipe.ingredients[index]?.unit || 'grams'}
+                    onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                  >
+                    <option value="grams">g</option>
+                    <option value="ml">ml</option>
+                    <option value="units">units</option>
+                  </select>
                   <input
                     type="text"
                     className="edit-input-name"
@@ -299,11 +309,19 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
                     onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
                     placeholder="Ingredient name"
                   />
+                  <input
+                    type="text"
+                    className="edit-input-desc"
+                    value={editedRecipe.ingredients[index]?.description || ''}
+                    onChange={(e) => handleIngredientChange(index, 'description', e.target.value)}
+                    placeholder="Description (diced, fresh, etc.)"
+                  />
                   <button className="remove-btn" onClick={() => removeIngredient(index)}>×</button>
-                </>
+                </div>
               ) : (
                 <>
-                  <strong>{ingredient.quantity}</strong> {ingredient.name}
+                  <strong>{ingredient.quantity} {ingredient.unit === 'units' ? '' : ingredient.unit}</strong> {ingredient.name}
+                  {ingredient.description && <span className="ingredient-desc"> - {ingredient.description}</span>}
                 </>
               )}
             </li>
