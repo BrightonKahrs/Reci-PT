@@ -226,10 +226,13 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                     <div className="meal-cell-content">
                       {meals.map((meal, idx) => {
                         const macros = meal.nutritional_info || {}
+                        const isDraft = !meal.recipe_id || meal.recipe_id === 'recipe:draft' || meal.recipe_id.endsWith(':draft')
                         return (
-                          <div key={idx} className="meal-item">
+                          <div key={idx} className={`meal-item ${isDraft ? 'draft' : ''}`}>
                             <div className="meal-item-header">
-                              <span className="meal-name" title={meal.title}>{meal.title}</span>
+                              <span className="meal-name" title={meal.title}>
+                                {meal.title}
+                              </span>
                               {showEditMode && (
                                 <button 
                                   className="remove-meal-btn"

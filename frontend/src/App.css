@@ -1080,6 +1080,40 @@
   background: rgba(255,150,150,0.3);
 }
 
+/* Draft meal styling */
+.meal-item.draft {
+  background: linear-gradient(135deg, #e8eaec 0%, #d5d8dc 100%);
+  border: 2px dotted #7f8c8d;
+}
+
+.meal-item.draft .meal-name {
+  color: #2c3e50;
+}
+
+.meal-item.draft .meal-macros .macro {
+  color: #2c3e50;
+}
+
+.meal-item.draft .meal-macros .macro.cal {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.meal-item.draft .meal-macros .macro.pro {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.meal-item.draft .meal-macros .macro.carb {
+  background: #d4edda;
+  color: #155724;
+}
+
+.meal-item.draft .meal-macros .macro.fat {
+  background: #f8d7da;
+  color: #721c24;
+}
+
 .meal-item .remove-meal-btn {
   width: 16px;
   height: 16px;
