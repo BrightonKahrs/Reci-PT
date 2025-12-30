@@ -129,90 +129,126 @@
   },
   "meal_plans": {
     "meal_plan:1": {
+      "meal_plan_title": "Healthy Weekday Meals",
       "recipe_plan": [
         {
-          "recipe_title": "Overnight Oats with Berries",
-          "meal_type": "breakfast",
-          "meal_day": ["monday", "wednesday", "friday"],
-          "servings": 1,
-          "estimated_macros": {
+          "title": "Overnight Oats with Berries",
+          "description": "Creamy overnight oats topped with fresh berries and a drizzle of maple syrup.",
+          "comments": "Prep the night before for an easy morning.",
+          "meal_time": ["Breakfast"],
+          "meal_day": ["Monday", "Wednesday", "Friday"],
+          "number_of_servings": 1,
+          "dietary_preferences": ["vegetarian", "dairy-free", "no added sugar"],
+          "nutritional_info": {
             "calories": 350,
             "protein": 12.0,
             "fat": 8.0,
             "carbohydrates": 55.0
-          }
+          },
+          "complexity": "Easy",
+          "recipe_id": "recipe:draft"
         },
         {
-          "recipe_title": "Avocado Toast with Chickpeas",
-          "meal_type": "breakfast",
-          "meal_day": ["tuesday", "thursday"],
-          "servings": 1,
-          "estimated_macros": {
+          "title": "Avocado Toast with Chickpeas",
+          "description": "Crispy toast topped with mashed avocado and seasoned chickpeas.",
+          "comments": "Add red pepper flakes for extra kick.",
+          "meal_time": ["Breakfast"],
+          "meal_day": ["Tuesday", "Thursday"],
+          "number_of_servings": 1,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 380,
             "protein": 14.0,
             "fat": 16.0,
             "carbohydrates": 42.0
-          }
+          },
+          "complexity": "Easy",
+          "recipe_id": "recipe:draft"
         },
         {
-          "recipe_title": "Mediterranean Quinoa Bowl",
-          "meal_type": "lunch",
-          "meal_day": ["monday", "wednesday"],
-          "servings": 1,
-          "estimated_macros": {
+          "title": "Mediterranean Quinoa Bowl",
+          "description": "A hearty and nutritious quinoa bowl with roasted vegetables, chickpeas, and a lemon-tahini dressing.",
+          "comments": "Can be served warm or cold.",
+          "meal_time": ["Lunch"],
+          "meal_day": ["Monday", "Wednesday"],
+          "number_of_servings": 1,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 450,
             "protein": 18.0,
             "fat": 16.0,
             "carbohydrates": 58.0
-          }
+          },
+          "complexity": "Easy",
+          "recipe_id": "recipe:1"
         },
         {
-          "recipe_title": "Spicy Black Bean Tacos",
-          "meal_type": "lunch",
-          "meal_day": ["tuesday", "thursday", "friday"],
-          "servings": 2,
-          "estimated_macros": {
+          "title": "Spicy Black Bean Tacos",
+          "description": "Flavorful black bean tacos with fresh salsa, avocado, and a kick of lime.",
+          "comments": "Use corn tortillas for gluten-free option.",
+          "meal_time": ["Lunch"],
+          "meal_day": ["Tuesday", "Thursday", "Friday"],
+          "number_of_servings": 2,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 380,
             "protein": 14.0,
             "fat": 12.0,
             "carbohydrates": 52.0
-          }
+          },
+          "complexity": "Easy",
+          "recipe_id": "recipe:2"
         },
         {
-          "recipe_title": "Thai Peanut Noodles",
-          "meal_type": "dinner",
-          "meal_day": ["monday", "thursday"],
-          "servings": 2,
-          "estimated_macros": {
+          "title": "Thai Peanut Noodles",
+          "description": "Creamy peanut noodles with crispy tofu and fresh vegetables in a savory Thai-inspired sauce.",
+          "comments": "Add extra sriracha for more heat.",
+          "meal_time": ["Dinner"],
+          "meal_day": ["Monday", "Thursday"],
+          "number_of_servings": 2,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 520,
             "protein": 22.0,
             "fat": 24.0,
             "carbohydrates": 54.0
-          }
+          },
+          "complexity": "Medium",
+          "recipe_id": "recipe:3"
         },
         {
-          "recipe_title": "Stuffed Bell Peppers",
-          "meal_type": "dinner",
-          "meal_day": ["tuesday", "friday"],
-          "servings": 2,
-          "estimated_macros": {
+          "title": "Stuffed Bell Peppers",
+          "description": "Colorful bell peppers stuffed with quinoa, black beans, and vegetables.",
+          "comments": "Great for meal prep.",
+          "meal_time": ["Dinner"],
+          "meal_day": ["Tuesday", "Friday"],
+          "number_of_servings": 2,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 420,
             "protein": 16.0,
             "fat": 14.0,
             "carbohydrates": 56.0
-          }
+          },
+          "complexity": "Medium",
+          "recipe_id": "recipe:draft"
         },
         {
-          "recipe_title": "Lentil Vegetable Soup",
-          "meal_type": "dinner",
-          "meal_day": ["wednesday"],
-          "servings": 3,
-          "estimated_macros": {
+          "title": "Lentil Vegetable Soup",
+          "description": "Hearty and warming lentil soup packed with vegetables and aromatic spices.",
+          "comments": "Freezes well for later.",
+          "meal_time": ["Dinner"],
+          "meal_day": ["Wednesday"],
+          "number_of_servings": 3,
+          "dietary_preferences": ["vegetarian", "vegan", "dairy-free"],
+          "nutritional_info": {
             "calories": 320,
             "protein": 18.0,
             "fat": 6.0,
             "carbohydrates": 48.0
-          }
+          },
+          "complexity": "Easy",
+          "recipe_id": "recipe:draft"
         }
       ]
     }

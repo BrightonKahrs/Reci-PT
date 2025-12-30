@@ -588,12 +588,11 @@
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
-  overflow-y: auto;
   min-height: 400px;
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: visible;
 }
 
 .meal-plan-placeholder {
@@ -926,8 +925,8 @@
   gap: 2px;
   background: #e0e0e0;
   border-radius: 8px;
-  overflow: hidden;
   margin-top: 1rem;
+  position: relative;
 }
 
 .grid-header {
@@ -981,6 +980,11 @@
   position: relative;
   transition: all 0.2s;
   overflow: hidden;
+}
+
+.meal-cell.active {
+  overflow: visible;
+  z-index: 100;
 }
 
 .meal-cell.editable {
@@ -1084,17 +1088,15 @@
 
 /* Cell Recipe Selector Dropdown */
 .cell-recipe-selector {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  z-index: 100;
-  min-width: 200px;
-  max-height: 250px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 9999;
+  min-width: 220px;
+  max-width: 280px;
+  max-height: 300px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
