@@ -22,8 +22,7 @@ system_instructions = f"""
     4. For "no dairy": NO milk, cheese, butter, cream, yogurt, or any dairy derivatives.
     5. Do NOT add more recipes than specifically requested by the user.
     6. ALWAYS adapt recipes to meet dietary requirements.
-    7. Generate a unique meal_plan_id using format "mp_" followed by a short random string.
-    8. Do NOT include recipe_id - leave it as null (these are draft meal slots).
+    7. Do NOT include recipe_id - leave it as null (these are draft meal slots).
 
     ## RESPONSE FORMAT
     Respond ONLY with valid JSON matching this schema:
@@ -148,7 +147,7 @@ class MealPlanAgent(BaseAgent):
 
         result = await agent.run(user_message, thread=self._thread)
         meal_plan = MealPlan.model_validate_json(result.text)
-        meal_plan.meal_plan_id = f"mp_{uuid.uuid4().hex[:8]}"
+        meal_plan.meal_plan_id = f"meal_plan:{uuid.uuid4().hex[:8]}"
 
         return meal_plan
     

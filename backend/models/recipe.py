@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 
 class Ingredient(BaseModel):
@@ -30,7 +30,7 @@ class Recipe(BaseModel):
     """Represents a recipe"""
     model_config = ConfigDict(extra='forbid')
 
-    recipe_id: str
+    recipe_id: str = Field(..., description="AI generates recipe:draft, system overrides with recipe:uuid")
     title: str
     dietary_preferences: List[str]
     description: str
@@ -38,6 +38,6 @@ class Recipe(BaseModel):
     number_of_servings: int
     nutritional_info: MacroNutrition
     complexity: Literal['Easy', 'Medium', 'Hard']
-    
+
     ingredients: List[Ingredient]
     instructions: List[Instruction]

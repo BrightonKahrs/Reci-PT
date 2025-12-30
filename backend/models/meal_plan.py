@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
-from typing import List, Literal, Optional
+from typing import List, Literal
 
 from models.recipe import MacroNutrition
 
@@ -24,7 +24,7 @@ class MealSlot(BaseModel):
     complexity: Literal['Easy', 'Medium', 'Hard']
 
     # Link to recipe_id when MealSlot is upgraded to a full recipe
-    recipe_id: Optional[str] = None
+    recipe_id: str = Field(..., description="AI generates recipe:draft, system overrides with recipe:uuid")
 
     @property
     def is_draft(self) -> bool:
@@ -35,6 +35,6 @@ class MealPlan(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     # Should be created by system, not AI
-    meal_plan_id: Optional[str] = None
+    meal_plan_id: str = Field(..., description="AI generates meal_plan:draft, system overrides with meal_plan:uuid")
     meal_plan_title: str
     recipe_plan: List[MealSlot]

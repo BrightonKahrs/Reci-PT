@@ -1,6 +1,5 @@
 import logging
-
-from agent_framework import ChatMessage
+import uuid
 
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
@@ -75,9 +74,10 @@ class RecipeAgent(BaseAgent):
             self._thread = agent.get_new_thread()
 
         result = await agent.run(user_message, thread=self._thread)
-        logger.info(f"Generated Recipe: {result.text}")
-        # Parse the JSON response into Pydantic model
-        return Recipe.model_validate_json(result.text)
+        recipe = Recipe.model_validate_json(result.text)
+        recipe.recipe_id = f"recipe:{uuid.uuid4().hex[:8]}"
+
+        return recipe
     
     def _build_user_message(self, user_query: str, preferences: str) -> str:
         """Build user message with preferences context"""

@@ -315,11 +315,8 @@ function App() {
                   setLeftTab('recipe')
                 }}
                 onMealPlanGenerated={(generatedMealPlan) => {
-                  // generatedMealPlan from API is just the recipe_plan array
-                  setMealPlan({ 
-                    meal_plan_title: 'Generated Meal Plan', 
-                    recipe_plan: generatedMealPlan 
-                  })
+                  // generatedMealPlan is now the full MealPlan object from API
+                  setMealPlan(generatedMealPlan)
                   setIsCreatingMealPlan(false)
                   setMealPlanStatus('draft')
                   setLeftTab('plan')

@@ -152,10 +152,10 @@ function ChatPanel({ inputValue = '', onInputChange, onRecipeGenerated, onMealPl
           onRecipeGenerated(data.recipe)
         }
         assistantContent = `✅ Created recipe: **${data.recipe.title}**\n\nI've displayed it in the left panel. Would you like me to modify anything?`
-      } else if (hasMealPlanAgent && data.recipe_plan) {
-        // Meal plan was generated - notify parent and show confirmation
+      } else if (hasMealPlanAgent && (data.recipe_plan || data.meal_plan_title)) {
+        // Meal plan was generated - notify parent with full MealPlan object
         if (onMealPlanGenerated) {
-          onMealPlanGenerated(data.recipe_plan)
+          onMealPlanGenerated(data)
         }
         assistantContent = `✅ Created your meal plan!\n\nI've displayed it in the left panel. Would you like to make any changes?`
       } else {

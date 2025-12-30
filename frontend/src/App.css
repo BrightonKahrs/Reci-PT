@@ -720,6 +720,29 @@
   gap: 0.5rem;
 }
 
+.meal-slot-schedule {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+  flex-wrap: wrap;
+}
+
+.meal-slot-schedule .meal-days {
+  font-size: 0.75rem;
+  color: #3498db;
+  background: #e8f4fd;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.meal-slot-schedule .meal-times {
+  font-size: 0.75rem;
+  color: #9b59b6;
+  background: #f3e8fd;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
 .meal-plan-recipe-header h4 {
   margin: 0;
   font-size: 0.95rem;

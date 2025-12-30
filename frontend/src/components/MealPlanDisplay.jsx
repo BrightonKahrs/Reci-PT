@@ -17,8 +17,20 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
   }
 
   const handleAddRecipe = (recipe) => {
-    // Add full recipe to the plan
-    const updatedRecipes = [...recipes, recipe]
+    // Convert Recipe to MealSlot format
+    const newMealSlot = {
+      meal_day: ['Monday'],  // Default - user can edit
+      meal_time: ['Dinner'], // Default - user can edit
+      title: recipe.title,
+      dietary_preferences: recipe.dietary_preferences || [],
+      description: recipe.description,
+      comments: recipe.comments || '',
+      number_of_servings: recipe.number_of_servings,
+      nutritional_info: recipe.nutritional_info,
+      complexity: recipe.complexity,
+      recipe_id: recipe.recipe_id || null  // Link to saved recipe if available
+    }
+    const updatedRecipes = [...recipes, newMealSlot]
     if (onUpdate) {
       onUpdate({ ...mealPlan, recipe_plan: updatedRecipes })
     }
@@ -75,10 +87,10 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
           </div>
         ) : (
           <div className="meal-plan-recipe-list">
-            {recipes.map((recipe, index) => (
+            {recipes.map((slot, index) => (
               <div key={index} className="meal-plan-recipe-card">
                 <div className="meal-plan-recipe-header">
-                  <h4>{recipe.title}</h4>
+                  <h4>{slot.title}</h4>
                   {isEditable && (
                     <button 
                       className="remove-recipe-btn"
@@ -89,12 +101,16 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                     </button>
                   )}
                 </div>
-                <p className="meal-plan-recipe-desc">{recipe.description}</p>
+                <div className="meal-slot-schedule">
+                  <span className="meal-days">{slot.meal_day?.join(', ')}</span>
+                  <span className="meal-times">{slot.meal_time?.join(', ')}</span>
+                </div>
+                <p className="meal-plan-recipe-desc">{slot.description}</p>
                 <div className="meal-plan-recipe-meta">
-                  <span className="complexity-badge">{recipe.complexity}</span>
-                  <span className="servings">{recipe.number_of_servings} servings</span>
-                  {recipe.nutritional_info && (
-                    <span className="calories">{recipe.nutritional_info.calories} cal</span>
+                  <span className="complexity-badge">{slot.complexity}</span>
+                  <span className="servings">{slot.number_of_servings} servings</span>
+                  {slot.nutritional_info && (
+                    <span className="calories">{slot.nutritional_info.calories} cal</span>
                   )}
                 </div>
               </div>

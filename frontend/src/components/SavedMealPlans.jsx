@@ -37,8 +37,8 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCrea
                 {item.meal_plan.recipe_plan?.length || 0} meals planned
               </p>
               <div className="saved-item-meals">
-                {item.meal_plan.recipe_plan?.slice(0, 3).map((meal, idx) => (
-                  <span key={idx} className="meal-preview">{meal.recipe_title}</span>
+                {item.meal_plan.recipe_plan?.slice(0, 3).map((slot, idx) => (
+                  <span key={idx} className="meal-preview">{slot.title}</span>
                 ))}
                 {(item.meal_plan.recipe_plan?.length || 0) > 3 && (
                   <span className="meal-preview more">+{item.meal_plan.recipe_plan.length - 3} more</span>
