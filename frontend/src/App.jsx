@@ -3,8 +3,10 @@ import './App.css'
 import { 
   RecipeDisplay, 
   MealPlanDisplay, 
+  GroceryListDisplay,
   SavedRecipes, 
   SavedMealPlans,
+  SavedGroceryLists,
   SettingsPanel,
   ChatPanel 
 } from './components'
@@ -14,13 +16,17 @@ const API_BASE_URL = 'http://localhost:8000'
 function App() {
   const [recipe, setRecipe] = useState(null)
   const [mealPlan, setMealPlan] = useState(null) // { meal_plan_title, recipe_plan }
-  const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
+  const [leftTab, setLeftTab] = useState('recipe') // 'recipe', 'plan', or 'grocery'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
   const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
   const [isCreatingMealPlan, setIsCreatingMealPlan] = useState(false)
   const [chatInputValue, setChatInputValue] = useState('')
   const [recipeStatus, setRecipeStatus] = useState('draft') // 'draft' or 'saved'
   const [mealPlanStatus, setMealPlanStatus] = useState('draft') // 'draft' or 'saved'
+  
+  // Grocery list state
+  const [groceryList, setGroceryList] = useState(null)
+  const [groceryListMealPlanTitle, setGroceryListMealPlanTitle] = useState('')
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -30,6 +36,7 @@ function App() {
   // Saved items state
   const [savedRecipes, setSavedRecipes] = useState([])
   const [savedMealPlans, setSavedMealPlans] = useState([])
+  const [savedGroceryLists, setSavedGroceryLists] = useState([])
   const [savedItemsLoading, setSavedItemsLoading] = useState(false)
 
   // Load settings and saved items on mount
@@ -41,9 +48,10 @@ function App() {
   const loadSavedItems = async () => {
     setSavedItemsLoading(true)
     try {
-      const [recipesRes, mealPlansRes] = await Promise.all([
+      const [recipesRes, mealPlansRes, groceryListsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/recipe/`),
-        fetch(`${API_BASE_URL}/meal-plan/`)
+        fetch(`${API_BASE_URL}/meal-plan/`),
+        fetch(`${API_BASE_URL}/grocery-list/`)
       ])
       
       if (recipesRes.ok) {
@@ -54,6 +62,11 @@ function App() {
       if (mealPlansRes.ok) {
         const mealPlansData = await mealPlansRes.json()
         setSavedMealPlans(mealPlansData.meal_plans || [])
+      }
+      
+      if (groceryListsRes.ok) {
+        const groceryListsData = await groceryListsRes.json()
+        setSavedGroceryLists(groceryListsData.grocery_lists || [])
       }
     } catch (err) {
       console.error('Failed to load saved items:', err)
@@ -84,6 +97,22 @@ function App() {
     }
   }
 
+  const deleteGroceryList = async (key) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/grocery-list/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        loadSavedItems()
+        // Clear the current grocery list if it was the one deleted
+        if (groceryList && groceryList.grocery_list_id === key.replace('grocery_list:', '')) {
+          setGroceryList(null)
+          setGroceryListMealPlanTitle('')
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete grocery list:', err)
+    }
+  }
+
   const saveCurrentRecipe = async () => {
     if (!recipe) return
     try {
@@ -111,9 +140,21 @@ function App() {
         body: JSON.stringify(planToSave)
       })
       if (response.ok) {
+        const result = await response.json()
         setMealPlanStatus('saved')
         setIsCreatingMealPlan(false)
         loadSavedItems()
+        
+        // Fetch the generated grocery list
+        if (result.grocery_list_key) {
+          const groceryRes = await fetch(`${API_BASE_URL}/grocery-list/${result.grocery_list_key}`)
+          if (groceryRes.ok) {
+            const groceryData = await groceryRes.json()
+            setGroceryList(groceryData)
+            setGroceryListMealPlanTitle(planToSave.meal_plan_title)
+            setLeftTab('grocery') // Switch to grocery list view
+          }
+        }
       }
     } catch (err) {
       console.error('Failed to save meal plan:', err)
@@ -214,6 +255,12 @@ function App() {
             >
               📅 Generate Meal Plan
             </button>
+            <button 
+              className={`panel-tab ${leftTab === 'grocery' ? 'active' : ''}`}
+              onClick={() => setLeftTab('grocery')}
+            >
+              🛒 Grocery List
+            </button>
           </div>
 
           <div className="panel-content">
@@ -312,6 +359,39 @@ function App() {
                     setMealPlanStatus('draft')
                   }}
                 />
+              </>
+            )}
+
+            {leftTab === 'grocery' && (
+              <>
+                {groceryList ? (
+                  <GroceryListDisplay 
+                    groceryList={groceryList}
+                    mealPlanTitle={groceryListMealPlanTitle}
+                    onClose={() => {
+                      setGroceryList(null)
+                      setGroceryListMealPlanTitle('')
+                    }}
+                  />
+                ) : (
+                  <SavedGroceryLists
+                    groceryLists={savedGroceryLists}
+                    onSelectGroceryList={(selectedGroceryList, key) => {
+                      setGroceryList(selectedGroceryList)
+                      // Try to get meal plan title from saved meal plans
+                      const mealPlanId = selectedGroceryList.meal_plan_id
+                      if (mealPlanId) {
+                        const matchingMealPlan = savedMealPlans.find(
+                          mp => mp.key === mealPlanId || mp.key === `meal_plan:${mealPlanId}`
+                        )
+                        setGroceryListMealPlanTitle(matchingMealPlan?.meal_plan?.meal_plan_title || 'Grocery List')
+                      } else {
+                        setGroceryListMealPlanTitle('Grocery List')
+                      }
+                    }}
+                    onDeleteGroceryList={deleteGroceryList}
+                  />
+                )}
               </>
             )}
           </div>

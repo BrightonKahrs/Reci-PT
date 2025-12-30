@@ -6,6 +6,7 @@ from models.meal_plan import MealPlan
 from models.route_endpoints import MealPlanInput
 from state.dependencies import get_state_store
 from state.store import StateStore
+from services.grocery_list import convert_meal_plan_to_grocery_list
 
 
 logger = logging.getLogger(__name__)
@@ -19,6 +20,7 @@ async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, stat
     
     If meal_plan_key is provided, updates the existing meal plan.
     Otherwise uses meal_plan_id from request, or generates a new GUID.
+    Also generates and saves a grocery list from the meal plan.
     """
     
     try:
@@ -40,15 +42,22 @@ async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, stat
             "recipe_plan": [slot.model_dump() for slot in request.recipe_plan]
         }
         
-        # Save to state store
+        # Save meal plan to state store
         await state_store.set(key, meal_plan_data)
         
+        # Generate and save grocery list from the meal plan
+        meal_plan = MealPlan.model_validate(meal_plan_data)
+        grocery_list = await convert_meal_plan_to_grocery_list(meal_plan, state_store)
+        await state_store.set(grocery_list.grocery_list_id, grocery_list.model_dump())
+        
         logger.info(f"{action.capitalize()} meal plan: {key}")
+        logger.info(f"Generated grocery list: {grocery_list.grocery_list_id} with {len(grocery_list.items)} items")
         
         return {
             "status": "success",
             "message": f"Meal plan {action} successfully",
-            "key": key
+            "key": key,
+            "grocery_list_key": grocery_list.grocery_list_id
         }
     except Exception as e:
         logger.error(f"Error saving meal plan: {e}")
