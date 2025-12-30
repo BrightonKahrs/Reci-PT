@@ -241,6 +241,7 @@ function App() {
                   onCreateNew={() => {
                     setRecipe(null)
                     setIsCreatingRecipe(true)
+                    setRecipeStatus('draft')
                     setChatInputValue('@recipe_agent ')
                     setRightTab('chat')
                   }}

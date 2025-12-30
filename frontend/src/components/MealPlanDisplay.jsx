@@ -10,20 +10,21 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
 
   // Initialize edited meal plan when mealPlan changes
   useEffect(() => {
-    if (mealPlan) {
+    if (isCreating) {
+      // New meal plan - start in edit mode
+      setEditedMealPlan(mealPlan ? JSON.parse(JSON.stringify(mealPlan)) : { meal_plan_title: '', recipe_plan: [] })
+      setIsEditing(true)
+    } else if (mealPlan) {
+      // Viewing existing meal plan - start in view mode
       setEditedMealPlan(JSON.parse(JSON.stringify(mealPlan)))
       setIsEditing(false)
-    } else if (isCreating) {
-      setEditedMealPlan({ meal_plan_title: '', recipe_plan: [] })
-      setIsEditing(true)
     }
   }, [mealPlan, isCreating])
   
   if (!mealPlan && !isCreating) return null
   if (!editedMealPlan) return null
 
-  const isNewMealPlan = isCreating && !mealPlan
-  const showEditMode = isEditing || isNewMealPlan
+  const showEditMode = isEditing || isCreating
   const displayMealPlan = showEditMode ? editedMealPlan : mealPlan
 
   const recipes = displayMealPlan?.recipe_plan || []
@@ -44,14 +45,18 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
   }
 
   const handleCancelEdit = () => {
-    if (mealPlan) {
+    if (isCreating) {
+      // Creating new - cancel should close it
+      if (onCancel) {
+        onCancel()
+      }
+    } else if (mealPlan) {
+      // Editing existing - cancel should revert changes
       setEditedMealPlan(JSON.parse(JSON.stringify(mealPlan)))
       setIsEditing(false)
       if (onStatusChange) {
         onStatusChange('saved')
       }
-    } else if (onCancel) {
-      onCancel()
     }
   }
 
@@ -161,6 +166,7 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
               <>
                 <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
                 <button className="save-btn" onClick={onSave}>💾 Save</button>
+                <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}
           </div>

@@ -107,12 +107,15 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
   }
 
   const handleCancelEdit = () => {
-    if (recipe) {
+    if (isCreating) {
+      // Creating new - cancel should close it
+      if (onCancel) {
+        onCancel()
+      }
+    } else if (recipe) {
+      // Editing existing - cancel should revert changes
       setEditedRecipe(JSON.parse(JSON.stringify(recipe)))
       setIsEditing(false)
-    } else if (onCancel) {
-      // Close the new recipe template
-      onCancel()
     }
   }
 
@@ -167,13 +170,16 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
           <div className="recipe-actions">
             {showEditMode ? (
               <>
-                <button className="save-btn" onClick={handleSaveEdits}>✓ Done</button>
+                <button className="save-btn" onClick={() => { handleSaveEdits(); if (isNewRecipe) onSave(); }}>
+                  {isNewRecipe ? '💾 Save' : '✓ Done'}
+                </button>
                 <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
               </>
             ) : (
               <>
                 <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
                 <button className="save-btn" onClick={onSave}>💾 Save</button>
+                <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}
           </div>
