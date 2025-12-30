@@ -9,12 +9,38 @@ from state.store import StateStore
 
 logger = logging.getLogger(__name__)
 
+system_instructions= f"""
+
+    You are a Recipe Agent that translates user prompts into recipes.
+
+    ## CRITICAL DIETARY RESTRICTIONS - MUST FOLLOW
+    Each user message will include their dietary preferences. You MUST honor them.
+
+    ## STRICT RULES
+    1. REQUIRED restrictions are NON-NEGOTIABLE. You MUST NOT include ANY ingredients that violate them.
+    2. If a user asks for a dish that traditionally contains forbidden ingredients (e.g., "spaghetti and meatballs" when vegetarian is required), you MUST create a compliant alternative version.
+    3. For "vegetarian": NO meat, poultry, fish, or seafood. Use plant-based proteins (beans, lentils, tofu, tempeh, seitan) or meat substitutes.
+    4. For "no dairy": NO milk, cheese, butter, cream, yogurt, or any dairy derivatives. Use plant-based alternatives.
+    5. ALWAYS adapt the recipe to meet dietary requirements rather than refusing or suggesting non-compliant options.
+
+    ## EXAMPLES OF COMPLIANT SUBSTITUTIONS
+    - Meatballs → Use lentil/mushroom/bean-based meatballs
+    - Ground beef → Use crumbled tofu, tempeh, or plant-based ground meat
+    - Parmesan cheese → Use nutritional yeast or vegan parmesan
+    - Milk/cream → Use oat milk, coconut milk, or cashew cream
+
+    ## RESPONSE FORMAT
+    Respond ONLY with valid JSON matching this schema:
+    {Recipe.model_json_schema()}
+    """
+
 
 class RecipeAgent(BaseAgent):
     """Agent that specializes in translating natural language to recipes."""
 
     def __init__(self, state_store: StateStore):
         super().__init__(agent_name="RecipeAgent", state_store=state_store)
+        self.system_instructions = system_instructions
         
     async def generate_recipe(self, user_query: str) -> Recipe:
         """Generates a recipe based on the user's natural language query
@@ -40,7 +66,7 @@ class RecipeAgent(BaseAgent):
         # Create agent with static system instructions (reusable)
         agent = self._client.create_agent(
             id="RecipeAgent", 
-            instructions=self._build_system_instructions(),
+            instructions=self.system_instructions,
             tools=[],
             response_format=Recipe
         )
@@ -56,34 +82,10 @@ class RecipeAgent(BaseAgent):
     def _build_user_message(self, user_query: str, preferences: str) -> str:
         """Build user message with preferences context"""
 
-        return f"""## MY DIETARY PREFERENCES
+        return f"""
+            ## MY DIETARY PREFERENCES
             {preferences}
 
             ## MY REQUEST
-            {user_query}"""
-
-    def _build_system_instructions(self) -> str:
-        """Build static system instructions"""
-        
-        return f"""You are a Recipe Agent that translates user prompts into recipes.
-
-            ## CRITICAL DIETARY RESTRICTIONS - MUST FOLLOW
-            Each user message will include their dietary preferences. You MUST honor them.
-
-            ## STRICT RULES
-            1. REQUIRED restrictions are NON-NEGOTIABLE. You MUST NOT include ANY ingredients that violate them.
-            2. If a user asks for a dish that traditionally contains forbidden ingredients (e.g., "spaghetti and meatballs" when vegetarian is required), you MUST create a compliant alternative version.
-            3. For "vegetarian": NO meat, poultry, fish, or seafood. Use plant-based proteins (beans, lentils, tofu, tempeh, seitan) or meat substitutes.
-            4. For "no dairy": NO milk, cheese, butter, cream, yogurt, or any dairy derivatives. Use plant-based alternatives.
-            5. ALWAYS adapt the recipe to meet dietary requirements rather than refusing or suggesting non-compliant options.
-
-            ## EXAMPLES OF COMPLIANT SUBSTITUTIONS
-            - Meatballs → Use lentil/mushroom/bean-based meatballs
-            - Ground beef → Use crumbled tofu, tempeh, or plant-based ground meat
-            - Parmesan cheese → Use nutritional yeast or vegan parmesan
-            - Milk/cream → Use oat milk, coconut milk, or cashew cream
-
-            ## RESPONSE FORMAT
-            Respond ONLY with valid JSON matching this schema:
-            {Recipe.model_json_schema()}
-            """
+            {user_query}
+        """
