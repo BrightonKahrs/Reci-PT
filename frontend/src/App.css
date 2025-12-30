@@ -1022,14 +1022,21 @@
 
 .meal-item {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  gap: 2px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 0.35rem 0.5rem;
   border-radius: 4px;
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+}
+
+.meal-item-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .meal-item .meal-name {
@@ -1040,6 +1047,37 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+}
+
+.meal-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.meal-macros .macro {
+  font-size: 0.55rem;
+  padding: 1px 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.9);
+  white-space: nowrap;
+}
+
+.meal-macros .macro.cal {
+  background: rgba(255,200,100,0.3);
+}
+
+.meal-macros .macro.pro {
+  background: rgba(100,200,255,0.3);
+}
+
+.meal-macros .macro.carb {
+  background: rgba(100,255,150,0.3);
+}
+
+.meal-macros .macro.fat {
+  background: rgba(255,150,150,0.3);
 }
 
 .meal-item .remove-meal-btn {
@@ -1064,6 +1102,10 @@
   opacity: 1;
 }
 
+.meal-item-header:hover .remove-meal-btn {
+  opacity: 1;
+}
+
 .meal-item .remove-meal-btn:hover {
   background: rgba(255,255,255,0.4);
 }
@@ -1084,6 +1126,70 @@
   border-color: #3498db;
   color: #3498db;
   background: #f0f7ff;
+}
+
+/* Daily Totals Row */
+.totals-row {
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  border-top: 2px solid #dee2e6;
+}
+
+.totals-row .meal-time-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.totals-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.daily-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.daily-totals .total-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.daily-totals .macro {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.daily-totals .macro.cal {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.daily-totals .macro.pro {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.daily-totals .macro.carb {
+  background: #d4edda;
+  color: #155724;
+}
+
+.daily-totals .macro.fat {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.totals-cell .no-meals {
+  color: #adb5bd;
+  font-size: 0.9rem;
 }
 
 /* Cell Recipe Selector Dropdown */

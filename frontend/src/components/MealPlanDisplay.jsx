@@ -75,6 +75,20 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
     )
   }
 
+  // Get total macros for a specific day
+  const getDailyTotals = (day) => {
+    const dayMeals = recipes.filter(slot => slot.meal_day?.includes(day))
+    return dayMeals.reduce((totals, meal) => {
+      const macros = meal.nutritional_info || {}
+      return {
+        calories: totals.calories + (macros.calories || 0),
+        protein: totals.protein + (macros.protein || 0),
+        carbohydrates: totals.carbohydrates + (macros.carbohydrates || 0),
+        fat: totals.fat + (macros.fat || 0)
+      }
+    }, { calories: 0, protein: 0, carbohydrates: 0, fat: 0 })
+  }
+
   // Handle clicking a cell to add recipe
   const handleCellClick = (day, mealTime, event) => {
     if (!showEditMode) return
@@ -210,20 +224,33 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                 >
                   {meals.length > 0 ? (
                     <div className="meal-cell-content">
-                      {meals.map((meal, idx) => (
-                        <div key={idx} className="meal-item">
-                          <span className="meal-name" title={meal.title}>{meal.title}</span>
-                          {showEditMode && (
-                            <button 
-                              className="remove-meal-btn"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleRemoveMeal(meal, day, mealTime)
-                              }}
-                            >×</button>
-                          )}
-                        </div>
-                      ))}
+                      {meals.map((meal, idx) => {
+                        const macros = meal.nutritional_info || {}
+                        return (
+                          <div key={idx} className="meal-item">
+                            <div className="meal-item-header">
+                              <span className="meal-name" title={meal.title}>{meal.title}</span>
+                              {showEditMode && (
+                                <button 
+                                  className="remove-meal-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleRemoveMeal(meal, day, mealTime)
+                                  }}
+                                >×</button>
+                              )}
+                            </div>
+                            {(macros.calories || macros.protein || macros.carbohydrates || macros.fat) && (
+                              <div className="meal-macros">
+                                {macros.calories > 0 && <span className="macro cal">{macros.calories}cal</span>}
+                                {macros.protein > 0 && <span className="macro pro">{macros.protein}g P</span>}
+                                {macros.carbohydrates > 0 && <span className="macro carb">{macros.carbohydrates}g C</span>}
+                                {macros.fat > 0 && <span className="macro fat">{macros.fat}g F</span>}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                       {showEditMode && (
                         <button 
                           className="add-more-btn"
@@ -242,6 +269,33 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
             })}
           </div>
         ))}
+        
+        {/* Daily Totals Row */}
+        <div className="meal-time-row totals-row">
+          <div className="meal-time-label">Daily Total</div>
+          {DAYS.map(day => {
+            const totals = getDailyTotals(day)
+            const hasData = totals.calories > 0 || totals.protein > 0
+            return (
+              <div key={`${day}-totals`} className="meal-cell totals-cell">
+                {hasData ? (
+                  <div className="daily-totals">
+                    <div className="total-row">
+                      <span className="macro cal">{totals.calories} cal</span>
+                      <span className="macro pro">{totals.protein}g P</span>
+                    </div>
+                    <div className="total-row">
+                      <span className="macro carb">{totals.carbohydrates}g C</span>
+                      <span className="macro fat">{totals.fat}g F</span>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="no-meals">—</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Recipe Selector Dropdown - rendered outside grid for overflow */}
