@@ -172,23 +172,32 @@ function App() {
       })
       if (response.ok) {
         const result = await response.json()
+        setMealPlan({ ...planToSave, meal_plan_id: result.key })
         setMealPlanStatus('saved')
         setIsCreatingMealPlan(false)
         loadSavedItems()
-        
-        // Fetch the generated grocery list
-        if (result.grocery_list_key) {
-          const groceryRes = await fetch(`${API_BASE_URL}/grocery-list/${result.grocery_list_key}`)
-          if (groceryRes.ok) {
-            const groceryData = await groceryRes.json()
-            setGroceryList(groceryData)
-            setGroceryListMealPlanTitle(planToSave.meal_plan_title)
-            setLeftTab('grocery') // Switch to grocery list view
-          }
-        }
       }
     } catch (err) {
       console.error('Failed to save meal plan:', err)
+    }
+  }
+
+  const generateGroceryListFromMealPlan = async (mealPlanKey) => {
+    if (!mealPlanKey) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/${mealPlanKey}/generate-grocery-list`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (response.ok) {
+        const result = await response.json()
+        setGroceryList(result.grocery_list)
+        setGroceryListStatus('saved')
+        setLeftTab('grocery')
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to generate grocery list:', err)
     }
   }
 
@@ -375,6 +384,7 @@ function App() {
                     }
                     setLeftTab('recipe')
                   }}
+                  onGenerateGroceryList={() => generateGroceryListFromMealPlan(mealPlan?.meal_plan_id)}
                 />
                 <SavedMealPlans 
                   savedMealPlans={savedMealPlans}

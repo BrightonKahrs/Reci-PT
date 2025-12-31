@@ -20,7 +20,6 @@ async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, stat
     
     If meal_plan_key is provided, updates the existing meal plan.
     Otherwise uses meal_plan_id from request, or generates a new GUID.
-    Also generates and saves a grocery list from the meal plan.
     """
     
     try:
@@ -45,23 +44,51 @@ async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, stat
         # Save meal plan to state store
         await state_store.set(key, meal_plan_data)
         
-        # Generate and save grocery list from the meal plan
-        meal_plan = MealPlan.model_validate(meal_plan_data)
-        grocery_list = await convert_meal_plan_to_grocery_list(meal_plan, state_store)
-        await state_store.set(grocery_list.grocery_list_id, grocery_list.model_dump())
-        
         logger.info(f"{action.capitalize()} meal plan: {key}")
-        logger.info(f"Generated grocery list: {grocery_list.grocery_list_id} with {len(grocery_list.items)} items")
         
         return {
             "status": "success",
             "message": f"Meal plan {action} successfully",
-            "key": key,
-            "grocery_list_key": grocery_list.grocery_list_id
+            "key": key
         }
     except Exception as e:
         logger.error(f"Error saving meal plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to save meal plan")
+
+
+@router.post("/{meal_plan_key}/generate-grocery-list")
+async def generate_grocery_list_from_meal_plan(meal_plan_key: str, state_store: StateStore = Depends(get_state_store)) -> dict:
+    """Generate a grocery list from a saved meal plan"""
+    
+    try:
+        # Retrieve the meal plan
+        meal_plan_data = await state_store.get(meal_plan_key)
+        
+        if not meal_plan_data:
+            raise HTTPException(status_code=404, detail="Meal plan not found")
+        
+        # Convert to MealPlan model
+        meal_plan = MealPlan.model_validate(meal_plan_data)
+        
+        # Generate grocery list
+        grocery_list = await convert_meal_plan_to_grocery_list(meal_plan, state_store)
+        
+        # Save the grocery list
+        await state_store.set(grocery_list.grocery_list_id, grocery_list.model_dump())
+        
+        logger.info(f"Generated grocery list: {grocery_list.grocery_list_id} with {len(grocery_list.items)} items")
+        
+        return {
+            "status": "success",
+            "message": "Grocery list generated successfully",
+            "grocery_list_key": grocery_list.grocery_list_id,
+            "grocery_list": grocery_list.model_dump()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating grocery list: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate grocery list")
 
 
 @router.get("/{meal_plan_key}")

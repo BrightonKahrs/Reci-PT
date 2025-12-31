@@ -849,6 +849,29 @@
   margin-top: 0.75rem;
 }
 
+.meal-plan-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.generate-grocery-btn {
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.generate-grocery-btn:hover {
+  background: #e0e0e0;
+}
+
 .plan-actions {
   display: flex;
   gap: 0.5rem;

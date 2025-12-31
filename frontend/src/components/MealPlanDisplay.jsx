@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const MEAL_TIMES = ['Breakfast', 'Lunch', 'Snack', 'Dinner']
 
-function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [], onOpenRecipe }) {
+function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel, savedRecipes = [], onOpenRecipe, onGenerateGroceryList }) {
   const [activeCell, setActiveCell] = useState(null) // { day, mealTime, rect }
   const [isEditing, setIsEditing] = useState(false)
   const [editedMealPlan, setEditedMealPlan] = useState(null)
@@ -346,6 +346,14 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
       
       {showEditMode && (
         <p className="plan-hint">Click + to add recipes, or use @mealplan_agent in chat to generate a meal plan</p>
+      )}
+
+      {!showEditMode && status === 'saved' && onGenerateGroceryList && recipes.length > 0 && (
+        <div className="meal-plan-actions">
+          <button className="generate-grocery-btn" onClick={onGenerateGroceryList}>
+            🛒 Generate Grocery List
+          </button>
+        </div>
       )}
     </div>
   )
