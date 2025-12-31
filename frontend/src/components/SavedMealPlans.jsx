@@ -1,6 +1,6 @@
 import React from 'react'
 
-function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
+function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCreateNew }) {
   return (
     <div className="saved-items-container">
       <div className="saved-items-header">
@@ -10,17 +10,26 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
       
       {loading ? (
         <div className="loading">Loading saved meal plans...</div>
-      ) : !savedMealPlans || savedMealPlans.length === 0 ? (
-        <p className="empty-message">No saved meal plans yet. Generate and save a meal plan to see it here!</p>
       ) : (
         <div className="saved-items-grid">
+          {/* Create New Card - Always First */}
+          <div className="saved-item-card create-new-card" onClick={onCreateNew}>
+            <div className="create-new-content">
+              <span className="create-new-icon">+</span>
+              <span className="create-new-text">Create new meal plan</span>
+            </div>
+          </div>
+          
           {savedMealPlans.map((item) => (
             <div key={item.key} className="saved-item-card meal-plan-card">
               <div className="saved-item-header">
-                <h4>Meal Plan</h4>
+                <h4>{item.meal_plan.meal_plan_title || 'Untitled Plan'}</h4>
                 <button 
                   className="delete-btn" 
-                  onClick={() => onDelete(item.key)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(item.key)
+                  }}
                   title="Delete meal plan"
                 >
                   🗑️
@@ -30,8 +39,8 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
                 {item.meal_plan.recipe_plan?.length || 0} meals planned
               </p>
               <div className="saved-item-meals">
-                {item.meal_plan.recipe_plan?.slice(0, 3).map((meal, idx) => (
-                  <span key={idx} className="meal-preview">{meal.recipe_title}</span>
+                {item.meal_plan.recipe_plan?.slice(0, 3).map((slot, idx) => (
+                  <span key={idx} className="meal-preview">{slot.title}</span>
                 ))}
                 {(item.meal_plan.recipe_plan?.length || 0) > 3 && (
                   <span className="meal-preview more">+{item.meal_plan.recipe_plan.length - 3} more</span>
@@ -39,7 +48,7 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView }) {
               </div>
               <button 
                 className="load-btn"
-                onClick={() => onView(item.meal_plan.recipe_plan)}
+                onClick={() => onView(item.meal_plan)}
               >
                 View Plan
               </button>

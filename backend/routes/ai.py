@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from ai.agents.chat_agent import ChatAgent
 from ai.agents.meal_plan_agent import MealPlanAgent
 from ai.agents.recipe_agent import RecipeAgent
-from models.response import RecipeInput, RecipeOutput
+from models.route_endpoints import RecipeInput, RecipeOutput
 from models.meal_plan import MealPlan
 from state.dependencies import get_state_store
 from state.store import StateStore

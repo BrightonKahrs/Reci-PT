@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { 
   RecipeDisplay, 
   MealPlanDisplay, 
+  GroceryListDisplay,
   SavedRecipes, 
   SavedMealPlans,
+  SavedGroceryLists,
   SettingsPanel,
   ChatPanel 
 } from './components'
@@ -12,13 +14,23 @@ import {
 const API_BASE_URL = 'http://localhost:8000'
 
 function App() {
-  const [query, setQuery] = useState('')
   const [recipe, setRecipe] = useState(null)
-  const [recipePlan, setRecipePlan] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [leftTab, setLeftTab] = useState('recipe') // 'recipe' or 'plan'
+  const [mealPlan, setMealPlan] = useState(null) // { meal_plan_title, recipe_plan }
+  const [leftTab, setLeftTab] = useState('recipe') // 'recipe', 'plan', or 'grocery'
   const [rightTab, setRightTab] = useState('chat') // 'chat' or 'settings'
+  const [isCreatingRecipe, setIsCreatingRecipe] = useState(false)
+  const [isCreatingMealPlan, setIsCreatingMealPlan] = useState(false)
+  const [chatInputValue, setChatInputValue] = useState('')
+  const [recipeStatus, setRecipeStatus] = useState('draft') // 'draft' or 'saved'
+  const [mealPlanStatus, setMealPlanStatus] = useState('draft') // 'draft' or 'saved'
+  
+  // Refs
+  const leftPanelRef = useRef(null)
+  
+  // Grocery list state
+  const [groceryList, setGroceryList] = useState(null)
+  const [isCreatingGroceryList, setIsCreatingGroceryList] = useState(false)
+  const [groceryListStatus, setGroceryListStatus] = useState('draft')
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -28,6 +40,7 @@ function App() {
   // Saved items state
   const [savedRecipes, setSavedRecipes] = useState([])
   const [savedMealPlans, setSavedMealPlans] = useState([])
+  const [savedGroceryLists, setSavedGroceryLists] = useState([])
   const [savedItemsLoading, setSavedItemsLoading] = useState(false)
 
   // Load settings and saved items on mount
@@ -39,9 +52,10 @@ function App() {
   const loadSavedItems = async () => {
     setSavedItemsLoading(true)
     try {
-      const [recipesRes, mealPlansRes] = await Promise.all([
+      const [recipesRes, mealPlansRes, groceryListsRes] = await Promise.all([
         fetch(`${API_BASE_URL}/recipe/`),
-        fetch(`${API_BASE_URL}/meal-plan/`)
+        fetch(`${API_BASE_URL}/meal-plan/`),
+        fetch(`${API_BASE_URL}/grocery-list/`)
       ])
       
       if (recipesRes.ok) {
@@ -52,6 +66,11 @@ function App() {
       if (mealPlansRes.ok) {
         const mealPlansData = await mealPlansRes.json()
         setSavedMealPlans(mealPlansData.meal_plans || [])
+      }
+      
+      if (groceryListsRes.ok) {
+        const groceryListsData = await groceryListsRes.json()
+        setSavedGroceryLists(groceryListsData.grocery_lists || [])
       }
     } catch (err) {
       console.error('Failed to load saved items:', err)
@@ -82,15 +101,59 @@ function App() {
     }
   }
 
-  const saveCurrentRecipe = async () => {
-    if (!recipe) return
+  const deleteGroceryList = async (key) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/recipe/`, {
+      const response = await fetch(`${API_BASE_URL}/grocery-list/${key}`, { method: 'DELETE' })
+      if (response.ok) {
+        loadSavedItems()
+        // Clear the current grocery list if it was the one deleted
+        if (groceryList && groceryList.grocery_list_id === key.replace('grocery_list:', '')) {
+          setGroceryList(null)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete grocery list:', err)
+    }
+  }
+
+  const saveCurrentGroceryList = async (groceryListToSave) => {
+    const toSave = groceryListToSave || groceryList
+    if (!toSave) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/grocery-list/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(recipe)
+        body: JSON.stringify(toSave)
       })
       if (response.ok) {
+        setGroceryList(toSave)
+        setGroceryListStatus('saved')
+        setIsCreatingGroceryList(false)
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save grocery list:', err)
+    }
+  }
+
+  const saveCurrentRecipe = async (recipeToSave) => {
+    const toSave = recipeToSave || recipe
+    if (!toSave) return
+    console.log('Saving recipe:', JSON.stringify(toSave, null, 2))
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipe/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipe: toSave })
+      })
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Save failed:', errorData)
+      }
+      if (response.ok) {
+        setRecipe(toSave)
+        setRecipeStatus('saved')
+        setIsCreatingRecipe(false)
         loadSavedItems()
       }
     } catch (err) {
@@ -98,19 +161,43 @@ function App() {
     }
   }
 
-  const saveCurrentMealPlan = async () => {
-    if (!recipePlan) return
+  const saveCurrentMealPlan = async (mealPlanToSave) => {
+    const planToSave = mealPlanToSave || mealPlan
+    if (!planToSave) return
     try {
-      const response = await fetch(`${API_BASE_URL}/meal-plan/`, {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe_plan: recipePlan })
+        body: JSON.stringify(planToSave)
       })
       if (response.ok) {
+        const result = await response.json()
+        setMealPlan({ ...planToSave, meal_plan_id: result.key })
+        setMealPlanStatus('saved')
+        setIsCreatingMealPlan(false)
         loadSavedItems()
       }
     } catch (err) {
       console.error('Failed to save meal plan:', err)
+    }
+  }
+
+  const generateGroceryListFromMealPlan = async (mealPlanKey) => {
+    if (!mealPlanKey) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/meal-plan/${mealPlanKey}/generate-grocery-list`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (response.ok) {
+        const result = await response.json()
+        setGroceryList(result.grocery_list)
+        setGroceryListStatus('saved')
+        setLeftTab('grocery')
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to generate grocery list:', err)
     }
   }
 
@@ -185,44 +272,6 @@ function App() {
       .map(p => p.dietary_preference)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!query.trim()) return
-    
-    setLoading(true)
-    setError(null)
-
-    try {
-      const endpoint = leftTab === 'recipe' 
-        ? 'http://localhost:8000/ai/generate-recipe'
-        : 'http://localhost:8000/ai/generate-meal-plan'
-      
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: query }),
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate')
-      }
-      
-      const data = await response.json()
-      
-      if (leftTab === 'recipe') {
-        setRecipe(data.recipe)
-      } else {
-        setRecipePlan(data.recipe_plan)
-      }
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="app">
       <header className="header">
@@ -238,60 +287,157 @@ function App() {
               className={`panel-tab ${leftTab === 'recipe' ? 'active' : ''}`}
               onClick={() => setLeftTab('recipe')}
             >
-              🍲 Generate Recipe
+              🍲 Recipes
             </button>
             <button 
               className={`panel-tab ${leftTab === 'plan' ? 'active' : ''}`}
               onClick={() => setLeftTab('plan')}
             >
-              📅 Generate Meal Plan
+              📅 Meal Plans
+            </button>
+            <button 
+              className={`panel-tab ${leftTab === 'grocery' ? 'active' : ''}`}
+              onClick={() => setLeftTab('grocery')}
+            >
+              🛒 Grocery Lists
             </button>
           </div>
 
-          <div className="panel-content">
-            <form onSubmit={handleSubmit} className="query-form">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={leftTab === 'recipe' 
-                  ? "What recipe would you like? E.g., 'Healthy pasta with vegetables'" 
-                  : "What kind of meal plan? E.g., 'Healthy week with quick dinners'"
-                }
-                className="query-input"
-              />
-              <button type="submit" disabled={loading} className="generate-btn">
-                {loading ? 'Generating...' : `Generate ${leftTab === 'recipe' ? 'Recipe' : 'Meal Plan'}`}
-              </button>
-            </form>
-
-            {error && (
-              <div className="error-message">
-                ⚠️ {error}
-              </div>
-            )}
-
+          <div className="panel-content" ref={leftPanelRef}>
             {leftTab === 'recipe' && (
               <>
-                <RecipeDisplay recipe={recipe} onSave={saveCurrentRecipe} />
+                <RecipeDisplay 
+                  recipe={recipe} 
+                  onSave={saveCurrentRecipe} 
+                  onUpdate={setRecipe}
+                  isCreating={isCreatingRecipe}
+                  status={recipeStatus}
+                  onStatusChange={setRecipeStatus}
+                  onCancel={() => {
+                    setRecipe(null)
+                    setIsCreatingRecipe(false)
+                  }}
+                />
                 <SavedRecipes 
                   savedRecipes={savedRecipes}
                   loading={savedItemsLoading}
                   onDelete={deleteRecipe}
-                  onView={setRecipe}
+                  onView={(r) => {
+                    setRecipe(r)
+                    setIsCreatingRecipe(false)
+                    setRecipeStatus('saved')
+                    leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  onCreateNew={() => {
+                    setRecipe(null)
+                    setIsCreatingRecipe(true)
+                    setRecipeStatus('draft')
+                    setChatInputValue('@recipe_agent ')
+                    setRightTab('chat')
+                  }}
                 />
               </>
             )}
 
             {leftTab === 'plan' && (
               <>
-                <MealPlanDisplay recipePlan={recipePlan} onSave={saveCurrentMealPlan} />
+                <MealPlanDisplay 
+                  mealPlan={mealPlan} 
+                  onSave={saveCurrentMealPlan}
+                  onUpdate={(updatedMealPlan) => {
+                    setMealPlan(updatedMealPlan)
+                    setMealPlanStatus('draft')
+                  }}
+                  isCreating={isCreatingMealPlan}
+                  status={mealPlanStatus}
+                  onStatusChange={setMealPlanStatus}
+                  onCancel={() => {
+                    setMealPlan(null)
+                    setIsCreatingMealPlan(false)
+                  }}
+                  savedRecipes={savedRecipes}
+                  onOpenRecipe={(meal, isDraft) => {
+                    if (isDraft) {
+                      // Open as draft recipe to complete it
+                      setRecipe({
+                        title: meal.title,
+                        description: meal.description || '',
+                        dietary_preferences: meal.dietary_preferences || [],
+                        number_of_servings: meal.number_of_servings || 1,
+                        nutritional_info: meal.nutritional_info || { calories: 0, protein: 0, fat: 0, carbohydrates: 0 },
+                        complexity: meal.complexity || 'Easy',
+                        ingredients: [],
+                        instructions: []
+                      })
+                      setIsCreatingRecipe(true)
+                      setRecipeStatus('draft')
+                    } else {
+                      // Find and open the saved recipe
+                      const savedRecipe = savedRecipes.find(r => 
+                        r.recipe_id === meal.recipe_id || `recipe:${r.recipe_id}` === meal.recipe_id
+                      )
+                      if (savedRecipe) {
+                        setRecipe(savedRecipe)
+                        setIsCreatingRecipe(false)
+                        setRecipeStatus('saved')
+                      }
+                    }
+                    setLeftTab('recipe')
+                  }}
+                  onGenerateGroceryList={() => generateGroceryListFromMealPlan(mealPlan?.meal_plan_id)}
+                />
                 <SavedMealPlans 
                   savedMealPlans={savedMealPlans}
                   loading={savedItemsLoading}
                   onDelete={deleteMealPlan}
-                  onView={setRecipePlan}
+                  onView={(savedMealPlan) => {
+                    setMealPlan(savedMealPlan)
+                    setIsCreatingMealPlan(false)
+                    setMealPlanStatus('saved')
+                    leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                  }}
+                  onCreateNew={() => {
+                    setMealPlan({ meal_plan_title: '', recipe_plan: [] })
+                    setIsCreatingMealPlan(true)
+                    setMealPlanStatus('draft')
+                  }}
                 />
+              </>
+            )}
+
+            {leftTab === 'grocery' && (
+              <>
+                {(groceryList || isCreatingGroceryList) ? (
+                  <GroceryListDisplay 
+                    groceryList={groceryList}
+                    onSave={saveCurrentGroceryList}
+                    onUpdate={setGroceryList}
+                    isCreating={isCreatingGroceryList}
+                    status={groceryListStatus}
+                    onStatusChange={setGroceryListStatus}
+                    onClose={() => {
+                      setGroceryList(null)
+                      setIsCreatingGroceryList(false)
+                    }}
+                  />
+                ) : (
+                  <SavedGroceryLists
+                    savedGroceryLists={savedGroceryLists}
+                    loading={savedItemsLoading}
+                    onView={(selectedGroceryList, key) => {
+                      setGroceryList(selectedGroceryList)
+                      setIsCreatingGroceryList(false)
+                      setGroceryListStatus('saved')
+                      leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                    }}
+                    onDelete={deleteGroceryList}
+                    onCreateNew={() => {
+                      setGroceryList(null)
+                      setIsCreatingGroceryList(true)
+                      setGroceryListStatus('draft')
+                    }}
+                  />
+                )}
               </>
             )}
           </div>
@@ -316,7 +462,23 @@ function App() {
 
           <div className="panel-content">
             {rightTab === 'chat' && (
-              <ChatPanel />
+              <ChatPanel 
+                inputValue={chatInputValue}
+                onInputChange={setChatInputValue}
+                onRecipeGenerated={(recipe) => {
+                  setRecipe(recipe)
+                  setIsCreatingRecipe(false)
+                  setRecipeStatus('draft')
+                  setLeftTab('recipe')
+                }}
+                onMealPlanGenerated={(generatedMealPlan) => {
+                  // generatedMealPlan is now the full MealPlan object from API
+                  setMealPlan(generatedMealPlan)
+                  setIsCreatingMealPlan(false)
+                  setMealPlanStatus('draft')
+                  setLeftTab('plan')
+                }}
+              />
             )}
 
             {rightTab === 'settings' && (
