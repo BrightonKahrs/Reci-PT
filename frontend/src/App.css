@@ -278,6 +278,7 @@
 .recipe-meta {
   display: flex;
   gap: 1rem;
+  align-items: flex-start;
 }
 
 .recipe-meta span {
@@ -285,6 +286,15 @@
   border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.recipe-meta .complexity {
+  flex-shrink: 0;
+}
+
+.recipe-meta .recipe-actions {
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .complexity {
@@ -295,6 +305,82 @@
 .dietary {
   background-color: #fff3e0;
   color: #e65100;
+}
+
+/* Dietary Preferences Tags */
+.dietary-tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.dietary-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dietary-tags.display-mode {
+  flex: 1;
+}
+
+.dietary-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.tag-remove-btn {
+  background: none;
+  border: none;
+  color: #e65100;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.tag-remove-btn:hover {
+  opacity: 1;
+}
+
+.add-tag-input {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.add-tag-input .tag-input {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.add-tag-btn {
+  background: #4a90a4;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.add-tag-btn:hover {
+  background: #3a7a8a;
 }
 
 .recipe-description {

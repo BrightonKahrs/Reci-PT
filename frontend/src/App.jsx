@@ -113,16 +113,24 @@ function App() {
     }
   }
 
-  const saveCurrentRecipe = async () => {
-    if (!recipe) return
+  const saveCurrentRecipe = async (recipeToSave) => {
+    const toSave = recipeToSave || recipe
+    if (!toSave) return
+    console.log('Saving recipe:', JSON.stringify(toSave, null, 2))
     try {
       const response = await fetch(`${API_BASE_URL}/recipe/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe: recipe })
+        body: JSON.stringify({ recipe: toSave })
       })
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Save failed:', errorData)
+      }
       if (response.ok) {
+        setRecipe(toSave)
         setRecipeStatus('saved')
+        setIsCreatingRecipe(false)
         loadSavedItems()
       }
     } catch (err) {

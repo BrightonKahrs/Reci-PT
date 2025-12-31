@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 const BLANK_RECIPE = {
+  recipe_id: 'recipe:draft',
   title: '',
   description: '',
   comments: '',
@@ -20,6 +21,7 @@ const BLANK_RECIPE = {
 function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft', onStatusChange, onCancel }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedRecipe, setEditedRecipe] = useState(null)
+  const [newPreference, setNewPreference] = useState('')
 
   useEffect(() => {
     if (isCreating) {
@@ -155,24 +157,71 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
                 <option value="Medium">Medium</option>
                 <option value="Hard">Hard</option>
               </select>
-              <input
-                type="text"
-                className="edit-input"
-                value={editedRecipe.dietary_preferences}
-                onChange={(e) => handleFieldChange('dietary_preferences', e.target.value)}
-                placeholder="Dietary preferences (e.g., vegetarian, gluten-free)"
-              />
+              <div className="dietary-tags-container">
+                <div className="dietary-tags">
+                  {(editedRecipe.dietary_preferences || []).map((pref, index) => (
+                    <span key={index} className="dietary-tag">
+                      {pref}
+                      <button 
+                        type="button"
+                        className="tag-remove-btn"
+                        onClick={() => handleFieldChange('dietary_preferences', 
+                          editedRecipe.dietary_preferences.filter((_, i) => i !== index)
+                        )}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="add-tag-input">
+                  <input
+                    type="text"
+                    className="edit-input tag-input"
+                    value={newPreference}
+                    onChange={(e) => setNewPreference(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newPreference.trim()) {
+                        e.preventDefault()
+                        handleFieldChange('dietary_preferences', 
+                          [...(editedRecipe.dietary_preferences || []), newPreference.trim()]
+                        )
+                        setNewPreference('')
+                      }
+                    }}
+                    placeholder="Add preference..."
+                  />
+                  <button
+                    type="button"
+                    className="add-tag-btn"
+                    onClick={() => {
+                      if (newPreference.trim()) {
+                        handleFieldChange('dietary_preferences', 
+                          [...(editedRecipe.dietary_preferences || []), newPreference.trim()]
+                        )
+                        setNewPreference('')
+                      }
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </>
           ) : (
             <>
               <span className="complexity">{displayRecipe.complexity}</span>
-              <span className="dietary">{displayRecipe.dietary_preferences}</span>
+              <div className="dietary-tags display-mode">
+                {(displayRecipe.dietary_preferences || []).map((pref, index) => (
+                  <span key={index} className="dietary-tag">{pref}</span>
+                ))}
+              </div>
             </>
           )}
           <div className="recipe-actions">
             {showEditMode ? (
               <>
-                <button className="save-btn" onClick={() => { handleSaveEdits(); if (isNewRecipe) onSave(); }}>
+                <button className="save-btn" onClick={() => { handleSaveEdits(); if (isNewRecipe) onSave(editedRecipe); }}>
                   {isNewRecipe ? '💾 Save' : '✓ Done'}
                 </button>
                 <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
@@ -180,7 +229,7 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
             ) : (
               <>
                 <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
-                <button className="save-btn" onClick={onSave}>💾 Save</button>
+                <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
                 <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}
