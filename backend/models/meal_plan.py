@@ -1,21 +1,40 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Literal
 
 from models.recipe import MacroNutrition
 
 
-class RecipePlan(BaseModel):
-    """Represents a plan for generating a recipe"""
+class MealSlot(BaseModel):
+    """Represents a meal slot in a meal plan
+    Used to map a recipe to a specific day and meal type and hold
+    """
     model_config = ConfigDict(extra='forbid')
 
-    recipe_title: str
-    meal_type: Literal['breakfast', 'lunch', 'dinner', 'snack']
-    meal_day: List[Literal['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']]
-    servings: int = Field(..., description="Number of servings for the recipe")
-    estimated_macros: MacroNutrition
-    
+    # MealSlot specific fields - lists to allow same recipe on multiple days/times
+    meal_day: List[Literal['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']]
+    meal_time: List[Literal['Breakfast', 'Lunch', 'Snack', 'Dinner']]
+
+    # Shared fields from Recipe
+    title: str
+    dietary_preferences: List[str]
+    description: str
+    comments: str
+    number_of_servings: int = Field(..., description="Number of servings per meal_day and meal_time combination, for example one meal Mon-Fri should be 1")
+    nutritional_info: MacroNutrition
+    complexity: Literal['Easy', 'Medium', 'Hard']
+
+    # Link to recipe_id when MealSlot is upgraded to a full recipe
+    recipe_id: str = Field(..., description="AI generates recipe:draft, system overrides with recipe:uuid")
+
+    @property
+    def is_draft(self) -> bool:
+        return self.recipe_id is None
 
 class MealPlan(BaseModel):
     """Represents a list of recipe plans"""
     model_config = ConfigDict(extra='forbid')
-    recipe_plan: List[RecipePlan]
+
+    # Should be created by system, not AI
+    meal_plan_id: str = Field(..., description="AI generates meal_plan:draft, system overrides with meal_plan:uuid")
+    meal_plan_title: str
+    recipe_plan: List[MealSlot]

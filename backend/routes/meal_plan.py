@@ -3,8 +3,10 @@ import logging
 import uuid
 
 from models.meal_plan import MealPlan
+from models.route_endpoints import MealPlanInput
 from state.dependencies import get_state_store
 from state.store import StateStore
+from services.grocery_list import convert_meal_plan_to_grocery_list
 
 
 logger = logging.getLogger(__name__)
@@ -13,26 +15,33 @@ router = APIRouter(prefix="/meal-plan", tags=["Meal Plan Endpoints"])
 
 
 @router.post("/save")
-async def save_meal_plan(request: MealPlan, meal_plan_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
+async def save_meal_plan(request: MealPlanInput, meal_plan_key: str = None, state_store: StateStore = Depends(get_state_store)) -> dict:
     """Endpoint to save a generated meal plan to the state store
     
     If meal_plan_key is provided, updates the existing meal plan.
-    Otherwise, creates a new meal plan with a generated GUID.
+    Otherwise uses meal_plan_id from request, or generates a new GUID.
     """
     
     try:
-        # Use provided key or generate a new one
+        # Determine the key: provided param > request.meal_plan_id > generate new
         if meal_plan_key:
             key = meal_plan_key
+            action = "updated"
+        elif request.meal_plan_id:
+            key = request.meal_plan_id
             action = "updated"
         else:
             key = f"meal_plan:{uuid.uuid4()}"
             action = "saved"
         
-        # Convert Pydantic model to dict for storage
-        meal_plan_data = request.model_dump()
+        # Build the full MealPlan with the ID
+        meal_plan_data = {
+            "meal_plan_id": key,
+            "meal_plan_title": request.meal_plan_title,
+            "recipe_plan": [slot.model_dump() for slot in request.recipe_plan]
+        }
         
-        # Save to state store
+        # Save meal plan to state store
         await state_store.set(key, meal_plan_data)
         
         logger.info(f"{action.capitalize()} meal plan: {key}")
@@ -45,6 +54,41 @@ async def save_meal_plan(request: MealPlan, meal_plan_key: str = None, state_sto
     except Exception as e:
         logger.error(f"Error saving meal plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to save meal plan")
+
+
+@router.post("/{meal_plan_key}/generate-grocery-list")
+async def generate_grocery_list_from_meal_plan(meal_plan_key: str, state_store: StateStore = Depends(get_state_store)) -> dict:
+    """Generate a grocery list from a saved meal plan"""
+    
+    try:
+        # Retrieve the meal plan
+        meal_plan_data = await state_store.get(meal_plan_key)
+        
+        if not meal_plan_data:
+            raise HTTPException(status_code=404, detail="Meal plan not found")
+        
+        # Convert to MealPlan model
+        meal_plan = MealPlan.model_validate(meal_plan_data)
+        
+        # Generate grocery list
+        grocery_list = await convert_meal_plan_to_grocery_list(meal_plan, state_store)
+        
+        # Save the grocery list
+        await state_store.set(grocery_list.grocery_list_id, grocery_list.model_dump())
+        
+        logger.info(f"Generated grocery list: {grocery_list.grocery_list_id} with {len(grocery_list.items)} items")
+        
+        return {
+            "status": "success",
+            "message": "Grocery list generated successfully",
+            "grocery_list_key": grocery_list.grocery_list_id,
+            "grocery_list": grocery_list.model_dump()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating grocery list: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate grocery list")
 
 
 @router.get("/{meal_plan_key}")

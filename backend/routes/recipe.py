@@ -2,7 +2,7 @@ from fastapi import HTTPException, APIRouter, Depends
 import logging
 import uuid
 
-from models.response import RecipeOutput
+from models.route_endpoints import RecipeOutput
 from state.dependencies import get_state_store
 from state.store import StateStore
 

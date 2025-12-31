@@ -87,15 +87,6 @@ class BaseAgent(ABC):
             prefs.append(f"Preferred dietary preferences: {', '.join(preferred)}")
         
         return '\n'.join(prefs) if prefs else "No dietary restrictions."
-    
-    @abstractmethod
-    def _build_system_instructions(self) -> str:
-        """Build static system instructions for the agent.
-        
-        Returns:
-            str: Complete system instructions for the agent
-        """
-        ...
 
     @abstractmethod
     def _build_user_message(self, user_query: str, preferences: str) -> str:

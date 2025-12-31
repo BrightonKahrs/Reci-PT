@@ -7,4 +7,8 @@ from models.recipe import Ingredient
 class GroceryList(BaseModel):
     """Represents a grocery list"""
     model_config = ConfigDict(extra='forbid')
+    
+    grocery_list_id: str
+    title: str
+    meal_plan_id: str
     items: List[Ingredient]

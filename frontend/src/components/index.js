@@ -1,6 +1,8 @@
 export { default as RecipeDisplay } from './RecipeDisplay'
 export { default as MealPlanDisplay } from './MealPlanDisplay'
+export { default as GroceryListDisplay } from './GroceryListDisplay'
 export { default as SavedRecipes } from './SavedRecipes'
 export { default as SavedMealPlans } from './SavedMealPlans'
+export { default as SavedGroceryLists } from './SavedGroceryLists'
 export { default as SettingsPanel } from './SettingsPanel'
 export { default as ChatPanel } from './ChatPanel'

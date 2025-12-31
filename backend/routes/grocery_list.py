@@ -97,17 +97,27 @@ async def delete_grocery_list(grocery_list_key: str, state_store: StateStore = D
 
 @router.get("/")
 async def list_grocery_lists(state_store: StateStore = Depends(get_state_store)) -> dict:
-    """Endpoint to list all saved grocery list keys in the state store"""
+    """Endpoint to list all saved grocery lists with their full data"""
     
     try:
         # List all grocery list keys
         grocery_list_keys = await state_store.list(prefix="grocery_list:")
         
-        logger.info(f"Listed {len(grocery_list_keys)} grocery lists")
+        # Fetch full data for each grocery list
+        grocery_lists = []
+        for key in grocery_list_keys:
+            grocery_list_data = await state_store.get(key)
+            if grocery_list_data:
+                grocery_lists.append({
+                    "key": key,
+                    "grocery_list": grocery_list_data
+                })
+        
+        logger.info(f"Listed {len(grocery_lists)} grocery lists")
         
         return {
             "status": "success",
-            "grocery_list_keys": grocery_list_keys
+            "grocery_lists": grocery_lists
         }
     except Exception as e:
         logger.error(f"Error listing grocery lists: {e}")
