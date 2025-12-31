@@ -229,7 +229,9 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
             ) : (
               <>
                 <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
-                <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
+                {status === 'draft' && (
+                  <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
+                )}
                 <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}

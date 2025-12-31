@@ -58,6 +58,7 @@ async def convert_meal_plan_to_grocery_list(meal_plan: MealPlan, state_store: St
     
     grocery_list = GroceryList(
         grocery_list_id=f"grocery_list:{meal_plan.meal_plan_id.split(':')[1]}",
+        title=f"Grocery List for {meal_plan.meal_plan_title}",
         meal_plan_id=meal_plan.meal_plan_id,
         items=list(aggregated.values())
     )

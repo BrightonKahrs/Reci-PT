@@ -159,9 +159,6 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
 
   return (
     <div className="recipe-plan-container">
-      <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
-        {showEditMode ? '📝 Draft' : '✓ Saved'}
-      </div>
       <div className="plan-header">
         <div className="plan-title-section">
           <span className="plan-icon">📅</span>
@@ -178,7 +175,6 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
           )}
         </div>
         <div className="plan-header-right">
-          <p className="plan-count">{recipes.length} recipes</p>
           <div className="plan-actions">
             {showEditMode ? (
               <>
@@ -190,10 +186,15 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
             ) : (
               <>
                 <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
-                <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
+                {status === 'draft' && (
+                  <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
+                )}
                 <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}
+          </div>
+          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
           </div>
         </div>
       </div>

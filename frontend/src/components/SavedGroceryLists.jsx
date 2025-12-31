@@ -30,7 +30,7 @@ function SavedGroceryLists({ savedGroceryLists = [], loading, onDelete, onView, 
           {savedGroceryLists.map((item) => (
             <div key={item.key} className="saved-item-card grocery-list-card">
               <div className="saved-item-header">
-                <h4>🛒 Grocery List</h4>
+                <h4>🛒 {item.grocery_list.title || 'Grocery List'}</h4>
                 <button 
                   className="delete-btn" 
                   onClick={(e) => {

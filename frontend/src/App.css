@@ -784,9 +784,13 @@
 
 .plan-header-right {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.plan-header-right .recipe-status-tag {
+  position: static;
 }
 
 .plan-count {
@@ -2851,6 +2855,71 @@
   color: #999;
   font-size: 0.9rem;
   font-style: italic;
+}
+
+/* Grocery List Edit Mode */
+.grocery-edit-section {
+  margin-top: 1.5rem;
+}
+
+.grocery-edit-section .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.grocery-edit-section .section-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.grocery-edit-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grocery-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.grocery-edit-row .quantity-input {
+  width: 80px;
+}
+
+.grocery-edit-row .unit-select {
+  width: 90px;
+}
+
+.grocery-edit-row .name-input {
+  flex: 2;
+  min-width: 120px;
+}
+
+.grocery-edit-row .description-input {
+  flex: 1;
+  min-width: 100px;
+}
+
+.grocery-edit-row .remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.grocery-edit-row .remove-btn:hover {
+  opacity: 1;
 }
 
 /* Item badge for grocery list cards */

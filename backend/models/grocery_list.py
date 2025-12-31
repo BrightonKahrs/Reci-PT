@@ -9,5 +9,6 @@ class GroceryList(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
     grocery_list_id: str
+    title: str
     meal_plan_id: str
     items: List[Ingredient]

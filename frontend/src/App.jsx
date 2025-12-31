@@ -29,7 +29,8 @@ function App() {
   
   // Grocery list state
   const [groceryList, setGroceryList] = useState(null)
-  const [groceryListMealPlanTitle, setGroceryListMealPlanTitle] = useState('')
+  const [isCreatingGroceryList, setIsCreatingGroceryList] = useState(false)
+  const [groceryListStatus, setGroceryListStatus] = useState('draft')
   
   // Settings state
   const [settings, setSettings] = useState(null)
@@ -108,11 +109,30 @@ function App() {
         // Clear the current grocery list if it was the one deleted
         if (groceryList && groceryList.grocery_list_id === key.replace('grocery_list:', '')) {
           setGroceryList(null)
-          setGroceryListMealPlanTitle('')
         }
       }
     } catch (err) {
       console.error('Failed to delete grocery list:', err)
+    }
+  }
+
+  const saveCurrentGroceryList = async (groceryListToSave) => {
+    const toSave = groceryListToSave || groceryList
+    if (!toSave) return
+    try {
+      const response = await fetch(`${API_BASE_URL}/grocery-list/save`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toSave)
+      })
+      if (response.ok) {
+        setGroceryList(toSave)
+        setGroceryListStatus('saved')
+        setIsCreatingGroceryList(false)
+        loadSavedItems()
+      }
+    } catch (err) {
+      console.error('Failed to save grocery list:', err)
     }
   }
 
@@ -377,13 +397,17 @@ function App() {
 
             {leftTab === 'grocery' && (
               <>
-                {groceryList ? (
+                {(groceryList || isCreatingGroceryList) ? (
                   <GroceryListDisplay 
                     groceryList={groceryList}
-                    mealPlanTitle={groceryListMealPlanTitle}
+                    onSave={saveCurrentGroceryList}
+                    onUpdate={setGroceryList}
+                    isCreating={isCreatingGroceryList}
+                    status={groceryListStatus}
+                    onStatusChange={setGroceryListStatus}
                     onClose={() => {
                       setGroceryList(null)
-                      setGroceryListMealPlanTitle('')
+                      setIsCreatingGroceryList(false)
                     }}
                   />
                 ) : (
@@ -392,22 +416,15 @@ function App() {
                     loading={savedItemsLoading}
                     onView={(selectedGroceryList, key) => {
                       setGroceryList(selectedGroceryList)
-                      // Try to get meal plan title from saved meal plans
-                      const mealPlanId = selectedGroceryList.meal_plan_id
-                      if (mealPlanId) {
-                        const matchingMealPlan = savedMealPlans.find(
-                          mp => mp.key === mealPlanId || mp.key === `meal_plan:${mealPlanId}`
-                        )
-                        setGroceryListMealPlanTitle(matchingMealPlan?.meal_plan?.meal_plan_title || 'Grocery List')
-                      } else {
-                        setGroceryListMealPlanTitle('Grocery List')
-                      }
+                      setIsCreatingGroceryList(false)
+                      setGroceryListStatus('saved')
                       leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
                     }}
                     onDelete={deleteGroceryList}
                     onCreateNew={() => {
-                      setGroceryList({ items: [] })
-                      setGroceryListMealPlanTitle('New Grocery List')
+                      setGroceryList(null)
+                      setIsCreatingGroceryList(true)
+                      setGroceryListStatus('draft')
                     }}
                   />
                 )}
