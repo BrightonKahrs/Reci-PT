@@ -14,8 +14,10 @@ function SavedMealPlans({ savedMealPlans = [], loading, onDelete, onView, onCrea
         <div className="saved-items-grid">
           {/* Create New Card - Always First */}
           <div className="saved-item-card create-new-card" onClick={onCreateNew}>
-            <div className="create-new-icon">+</div>
-            <p>Create new meal plan</p>
+            <div className="create-new-content">
+              <span className="create-new-icon">+</span>
+              <span className="create-new-text">Create new meal plan</span>
+            </div>
           </div>
           
           {savedMealPlans.map((item) => (

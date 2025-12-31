@@ -23,8 +23,10 @@ function SavedGroceryLists({ savedGroceryLists = [], loading, onDelete, onView, 
         <div className="saved-items-grid">
           {/* Create New Card */}
           <div className="saved-item-card create-new-card" onClick={onCreateNew}>
-            <div className="create-new-icon">+</div>
-            <p>Create new grocery list</p>
+            <div className="create-new-content">
+              <span className="create-new-icon">+</span>
+              <span className="create-new-text">Create new grocery list</span>
+            </div>
           </div>
           
           {savedGroceryLists.map((item) => (
