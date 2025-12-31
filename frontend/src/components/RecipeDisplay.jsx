@@ -144,11 +144,11 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
           ) : (
             <h2>{displayRecipe.title}</h2>
           )}
-          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
-            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
-          </div>
         </div>
         <div className="recipe-header-right">
+          <div className={`status-badge ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? 'Draft' : (status === 'saved' ? 'Saved' : 'Draft')}
+          </div>
           <div className="recipe-actions">
             {showEditMode ? (
               <>

@@ -109,11 +109,11 @@ function GroceryListDisplay({ groceryList, onSave, onUpdate, isCreating, status 
           ) : (
             <h2>{editedList.title || 'Grocery List'}</h2>
           )}
-          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
-            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
-          </div>
         </div>
         <div className="recipe-header-right">
+          <div className={`status-badge ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? 'Draft' : (status === 'saved' ? 'Saved' : 'Draft')}
+          </div>
           <div className="recipe-actions">
             {showEditMode ? (
               <>

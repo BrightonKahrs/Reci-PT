@@ -173,11 +173,11 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
           ) : (
             <h2>{title || 'Meal Plan'}</h2>
           )}
-          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
-            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
-          </div>
         </div>
         <div className="plan-header-right">
+          <div className={`status-badge ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? 'Draft' : (status === 'saved' ? 'Saved' : 'Draft')}
+          </div>
           <div className="plan-actions">
             {showEditMode ? (
               <>
