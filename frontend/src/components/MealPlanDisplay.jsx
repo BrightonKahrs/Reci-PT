@@ -173,6 +173,9 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
           ) : (
             <h2>{title || 'Meal Plan'}</h2>
           )}
+          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
+          </div>
         </div>
         <div className="plan-header-right">
           <div className="plan-actions">
@@ -181,7 +184,7 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                 {(recipes.length > 0 || title) && (
                   <button className="save-btn" onClick={handleSaveEdits}>💾 Save</button>
                 )}
-                <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
+                <button className="cancel-btn" onClick={handleCancelEdit}>✕</button>
               </>
             ) : (
               <>
@@ -192,9 +195,6 @@ function MealPlanDisplay({ mealPlan, onSave, onUpdate, isCreating, status = 'dra
                 <button className="close-btn" onClick={onCancel}>✕</button>
               </>
             )}
-          </div>
-          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
-            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
           </div>
         </div>
       </div>

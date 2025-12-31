@@ -95,24 +95,44 @@ function GroceryListDisplay({ groceryList, onSave, onUpdate, isCreating, status 
 
   return (
     <div className="recipe-container grocery-list-view">
-      {status && (
-        <div className={`recipe-status-tag ${status}`}>
-          {status === 'draft' ? '📝 Draft' : '✓ Saved'}
-        </div>
-      )}
-      
       <div className="recipe-header">
-        {showEditMode ? (
-          <input
-            type="text"
-            className="edit-input edit-title"
-            value={editedList.title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-            placeholder="Grocery List Title"
-          />
-        ) : (
-          <h1>🛒 {editedList.title || 'Grocery List'}</h1>
-        )}
+        <div className="recipe-title-section">
+          <span className="recipe-icon">🛒</span>
+          {showEditMode ? (
+            <input
+              type="text"
+              className="edit-input edit-title"
+              value={editedList.title}
+              onChange={(e) => handleTitleChange(e.target.value)}
+              placeholder="Grocery List Title"
+            />
+          ) : (
+            <h2>{editedList.title || 'Grocery List'}</h2>
+          )}
+          <div className={`recipe-status-tag ${showEditMode ? 'draft' : status}`}>
+            {showEditMode ? '📝 Draft' : (status === 'saved' ? '✓ Saved' : '📝 Draft')}
+          </div>
+        </div>
+        <div className="recipe-header-right">
+          <div className="recipe-actions">
+            {showEditMode ? (
+              <>
+                <button className="save-btn" onClick={() => { handleSaveEdits(); if (isNewList && onSave) onSave(editedList); }}>
+                  💾 Save
+                </button>
+                <button className="cancel-btn" onClick={handleCancelEdit}>✕</button>
+              </>
+            ) : (
+              <>
+                <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
+                {status === 'draft' && onSave && (
+                  <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
+                )}
+                {onClose && <button className="close-btn" onClick={onClose}>✕</button>}
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="recipe-meta">
@@ -122,25 +142,6 @@ function GroceryListDisplay({ groceryList, onSave, onUpdate, isCreating, status 
           </span>
         )}
         <span className="dietary">{items.length} items</span>
-        
-        <div className="recipe-actions">
-          {showEditMode ? (
-            <>
-              <button className="save-btn" onClick={() => { handleSaveEdits(); if (isNewList && onSave) onSave(editedList); }}>
-                {isNewList ? '💾 Save' : '✓ Done'}
-              </button>
-              <button className="cancel-btn" onClick={handleCancelEdit}>✕ Cancel</button>
-            </>
-          ) : (
-            <>
-              <button className="edit-btn" onClick={handleEditClick}>✏️ Edit</button>
-              {status === 'draft' && onSave && (
-                <button className="save-btn" onClick={() => onSave()}>💾 Save</button>
-              )}
-              {onClose && <button className="close-btn" onClick={onClose}>✕</button>}
-            </>
-          )}
-        </div>
       </div>
 
       {showEditMode ? (
