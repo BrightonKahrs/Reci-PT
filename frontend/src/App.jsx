@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { 
   RecipeDisplay, 
@@ -23,6 +23,9 @@ function App() {
   const [chatInputValue, setChatInputValue] = useState('')
   const [recipeStatus, setRecipeStatus] = useState('draft') // 'draft' or 'saved'
   const [mealPlanStatus, setMealPlanStatus] = useState('draft') // 'draft' or 'saved'
+  
+  // Refs
+  const leftPanelRef = useRef(null)
   
   // Grocery list state
   const [groceryList, setGroceryList] = useState(null)
@@ -255,23 +258,23 @@ function App() {
               className={`panel-tab ${leftTab === 'recipe' ? 'active' : ''}`}
               onClick={() => setLeftTab('recipe')}
             >
-              🍲 Generate Recipe
+              🍲 Recipes
             </button>
             <button 
               className={`panel-tab ${leftTab === 'plan' ? 'active' : ''}`}
               onClick={() => setLeftTab('plan')}
             >
-              📅 Generate Meal Plan
+              📅 Meal Plans
             </button>
             <button 
               className={`panel-tab ${leftTab === 'grocery' ? 'active' : ''}`}
               onClick={() => setLeftTab('grocery')}
             >
-              🛒 Grocery List
+              🛒 Grocery Lists
             </button>
           </div>
 
-          <div className="panel-content">
+          <div className="panel-content" ref={leftPanelRef}>
             {leftTab === 'recipe' && (
               <>
                 <RecipeDisplay 
@@ -294,6 +297,7 @@ function App() {
                     setRecipe(r)
                     setIsCreatingRecipe(false)
                     setRecipeStatus('saved')
+                    leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                   onCreateNew={() => {
                     setRecipe(null)
@@ -360,6 +364,7 @@ function App() {
                     setMealPlan(savedMealPlan)
                     setIsCreatingMealPlan(false)
                     setMealPlanStatus('saved')
+                    leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
                   }}
                   onCreateNew={() => {
                     setMealPlan({ meal_plan_title: '', recipe_plan: [] })
@@ -383,8 +388,9 @@ function App() {
                   />
                 ) : (
                   <SavedGroceryLists
-                    groceryLists={savedGroceryLists}
-                    onSelectGroceryList={(selectedGroceryList, key) => {
+                    savedGroceryLists={savedGroceryLists}
+                    loading={savedItemsLoading}
+                    onView={(selectedGroceryList, key) => {
                       setGroceryList(selectedGroceryList)
                       // Try to get meal plan title from saved meal plans
                       const mealPlanId = selectedGroceryList.meal_plan_id
@@ -396,8 +402,13 @@ function App() {
                       } else {
                         setGroceryListMealPlanTitle('Grocery List')
                       }
+                      leftPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
                     }}
-                    onDeleteGroceryList={deleteGroceryList}
+                    onDelete={deleteGroceryList}
+                    onCreateNew={() => {
+                      setGroceryList({ items: [] })
+                      setGroceryListMealPlanTitle('New Grocery List')
+                    }}
                   />
                 )}
               </>

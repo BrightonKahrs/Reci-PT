@@ -1,71 +1,75 @@
-import React from 'react';
+import React from 'react'
 
-function SavedGroceryLists({ groceryLists, onSelectGroceryList, onDeleteGroceryList }) {
-  if (!groceryLists || groceryLists.length === 0) {
-    return (
-      <div className="saved-grocery-lists">
-        <h2>Saved Grocery Lists</h2>
-        <p className="no-items-message">No saved grocery lists yet. Save a meal plan to generate a grocery list.</p>
-      </div>
-    );
+function SavedGroceryLists({ savedGroceryLists = [], loading, onDelete, onView, onCreateNew }) {
+  const getItemCount = (groceryList) => {
+    return groceryList?.items?.length || 0
   }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getItemCount = (groceryList) => {
-    return groceryList?.items?.length || 0;
-  };
-
   const getPreviewItems = (groceryList) => {
-    const items = groceryList?.items || [];
-    return items.slice(0, 3).map(item => item.name).join(', ');
-  };
+    const items = groceryList?.items || []
+    return items.slice(0, 4).map(item => item.name)
+  }
 
   return (
-    <div className="saved-grocery-lists">
-      <h2>Saved Grocery Lists</h2>
-      <div className="grocery-lists-grid">
-        {groceryLists.map(({ key, grocery_list }) => (
-          <div key={key} className="grocery-list-card">
-            <div className="grocery-list-card-header">
-              <h3>Grocery List</h3>
-              {grocery_list.meal_plan_id && (
-                <span className="meal-plan-tag">
-                  {grocery_list.meal_plan_id.replace('meal_plan:', '')}
-                </span>
-              )}
-            </div>
-            <div className="grocery-list-card-body">
-              <p className="item-count">{getItemCount(grocery_list)} items</p>
-              <p className="item-preview">{getPreviewItems(grocery_list)}...</p>
-            </div>
-            <div className="grocery-list-card-actions">
-              <button 
-                className="view-button"
-                onClick={() => onSelectGroceryList(grocery_list, key)}
-              >
-                View
-              </button>
-              <button 
-                className="delete-button"
-                onClick={() => onDeleteGroceryList(key)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+    <div className="saved-items-container">
+      <div className="saved-items-header">
+        <h2>🛒 My Saved Grocery Lists</h2>
+        <span className="item-count">{savedGroceryLists?.length || 0} lists</span>
       </div>
+      
+      {loading ? (
+        <div className="loading">Loading saved grocery lists...</div>
+      ) : (
+        <div className="saved-items-grid">
+          {/* Create New Card */}
+          <div className="saved-item-card create-new-card" onClick={onCreateNew}>
+            <div className="create-new-icon">+</div>
+            <p>Create new grocery list</p>
+          </div>
+          
+          {savedGroceryLists.map((item) => (
+            <div key={item.key} className="saved-item-card grocery-list-card">
+              <div className="saved-item-header">
+                <h4>🛒 Grocery List</h4>
+                <button 
+                  className="delete-btn" 
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(item.key)
+                  }}
+                  title="Delete grocery list"
+                >
+                  🗑️
+                </button>
+              </div>
+              {item.grocery_list.meal_plan_id && (
+                <p className="saved-item-description">
+                  From: {item.grocery_list.meal_plan_id.replace('meal_plan:', '')}
+                </p>
+              )}
+              <div className="saved-item-meta">
+                <span className="item-badge">{getItemCount(item.grocery_list)} items</span>
+              </div>
+              <div className="saved-item-meals">
+                {getPreviewItems(item.grocery_list).map((name, idx) => (
+                  <span key={idx} className="meal-preview">{name}</span>
+                ))}
+                {(item.grocery_list.items?.length || 0) > 4 && (
+                  <span className="meal-preview more">+{item.grocery_list.items.length - 4} more</span>
+                )}
+              </div>
+              <button 
+                className="load-btn"
+                onClick={() => onView(item.grocery_list, item.key)}
+              >
+                View List
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+  )
 }
 
-export default SavedGroceryLists;
+export default SavedGroceryLists
