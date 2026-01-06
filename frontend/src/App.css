@@ -396,6 +396,33 @@
   opacity: 1;
 }
 
+.add-tag-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-input-inline {
+  background-color: #f5f5f5;
+  color: #666;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  border: 1px dashed #ccc;
+  width: 70px;
+  outline: none;
+}
+
+.tag-input-inline::placeholder {
+  color: #999;
+}
+
+.tag-input-inline:focus {
+  border-color: #e65100;
+  border-style: solid;
+  background-color: #fff3e0;
+  width: 120px;
+}
+
 .add-tag-input {
   display: flex;
   gap: 0.5rem;
@@ -570,64 +597,109 @@
 
 .edit-input {
   padding: 0.5rem;
-  border: 1px solid #3498db;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
   font-size: 0.9rem;
-  background: #f8fbff;
+  background: white;
 }
 
 .edit-input:focus {
   outline: none;
-  border-color: #2980b9;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 .edit-title {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 600;
+  color: #2c3e50;
   width: 100%;
-  margin-bottom: 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+  margin: 0;
+}
+
+.edit-title:hover {
+  border-color: #e0e0e0;
+  background: #fafafa;
+}
+
+.edit-title:focus {
+  border-color: #3498db;
+  background: white;
+  outline: none;
 }
 
 .edit-select {
-  padding: 0.4rem 0.8rem;
-  border: 1px solid #3498db;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid transparent;
   border-radius: 6px;
-  font-size: 0.9rem;
-  background: #f8fbff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #e8f5e9;
+  color: #2e7d32;
   cursor: pointer;
+}
+
+.edit-select:hover {
+  border-color: #c8e6c9;
+}
+
+.edit-select:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .edit-textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #3498db;
+  padding: 0.5rem;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
   resize: vertical;
   font-family: inherit;
-  background: #f8fbff;
-  margin-bottom: 1rem;
+  background: white;
+  margin-bottom: 0.75rem;
+  color: #555;
+}
+
+.edit-textarea:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .edit-input-inline {
   width: 50px;
-  padding: 0.2rem 0.4rem;
-  border: 1px solid #3498db;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   text-align: center;
   font-size: inherit;
+  background: white;
+}
+
+.edit-input-inline:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .edit-input-nutrition {
-  width: 80px;
-  padding: 0.4rem;
-  border: 1px solid #3498db;
+  width: 70px;
+  padding: 0.3rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   text-align: center;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  background: white;
+}
+
+.edit-input-nutrition:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .section-header {
@@ -690,38 +762,64 @@
 }
 
 .edit-input-qty {
-  width: 70px;
-  padding: 0.4rem;
-  border: 1px solid #3498db;
+  width: 60px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 0.9rem;
+  text-align: center;
+  background: white;
+}
+
+.edit-input-qty:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .edit-input-unit {
   width: 70px;
-  padding: 0.4rem;
-  border: 1px solid #3498db;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 0.9rem;
   background: white;
 }
 
+.edit-input-unit:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
 .edit-input-name {
   flex: 1;
   min-width: 120px;
-  padding: 0.4rem;
-  border: 1px solid #3498db;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 0.9rem;
+  background: white;
+}
+
+.edit-input-name:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .edit-input-desc {
   flex: 1;
   min-width: 150px;
-  padding: 0.4rem;
-  border: 1px solid #3498db;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 0.9rem;
+  font-style: italic;
+  color: #666;
+  background: white;
+}
+
+.edit-input-desc:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 .ingredient-desc {
@@ -738,12 +836,18 @@
 .edit-textarea-instruction {
   flex: 1;
   padding: 0.5rem;
-  border: 1px solid #3498db;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
   font-size: 0.9rem;
   line-height: 1.4;
   resize: vertical;
   font-family: inherit;
+  background: white;
+}
+
+.edit-textarea-instruction:focus {
+  border-color: #3498db;
+  outline: none;
 }
 
 /* Meal Plan Styles */
@@ -2510,11 +2614,35 @@
   font-size: 0.9rem;
   resize: none;
   font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .chat-input:focus {
   outline: none;
   border-color: #3498db;
+}
+
+/* Agent-specific input styling */
+.chat-input.agent-recipe {
+  border-color: #e65100;
+  background: linear-gradient(to right, #fff3e0 0%, white 20%);
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.1);
+}
+
+.chat-input.agent-recipe:focus {
+  border-color: #e65100;
+  box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.2);
+}
+
+.chat-input.agent-mealplan {
+  border-color: #2e7d32;
+  background: linear-gradient(to right, #e8f5e9 0%, white 20%);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.chat-input.agent-mealplan:focus {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
 }
 
 .chat-send-btn {

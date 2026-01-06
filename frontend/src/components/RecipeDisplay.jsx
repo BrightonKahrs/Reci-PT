@@ -198,38 +198,24 @@ function RecipeDisplay({ recipe, onSave, onUpdate, isCreating, status = 'draft',
                     </button>
                   </span>
                 ))}
-              </div>
-              <div className="add-tag-input">
-                <input
-                  type="text"
-                  className="edit-input tag-input"
-                  value={newPreference}
-                  onChange={(e) => setNewPreference(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && newPreference.trim()) {
-                      e.preventDefault()
-                      handleFieldChange('dietary_preferences', 
-                        [...(editedRecipe.dietary_preferences || []), newPreference.trim()]
-                      )
-                      setNewPreference('')
-                    }
-                  }}
-                  placeholder="Add preference..."
-                />
-                <button
-                  type="button"
-                  className="add-tag-btn"
-                  onClick={() => {
-                    if (newPreference.trim()) {
-                      handleFieldChange('dietary_preferences', 
-                        [...(editedRecipe.dietary_preferences || []), newPreference.trim()]
-                      )
-                      setNewPreference('')
-                    }
-                  }}
-                >
-                  +
-                </button>
+                <div className="add-tag-inline">
+                  <input
+                    type="text"
+                    className="tag-input-inline"
+                    value={newPreference}
+                    onChange={(e) => setNewPreference(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newPreference.trim()) {
+                        e.preventDefault()
+                        handleFieldChange('dietary_preferences', 
+                          [...(editedRecipe.dietary_preferences || []), newPreference.trim()]
+                        )
+                        setNewPreference('')
+                      }
+                    }}
+                    placeholder="+ add"
+                  />
+                </div>
               </div>
             </div>
           </>

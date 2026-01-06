@@ -5,6 +5,25 @@ const AGENT_MENTIONS = [
   { id: 'mealplan_agent', label: '@mealplan_agent', description: 'Create a meal plan' },
 ]
 
+// Helper function to render message content with highlighted agent mentions
+const renderMessageContent = (content) => {
+  const agentPattern = /@(recipe_agent|mealplan_agent|meal_plan_agent)/gi
+  const parts = content.split(agentPattern)
+  
+  if (parts.length === 1) {
+    return content
+  }
+  
+  return parts.map((part, index) => {
+    if (part.toLowerCase() === 'recipe_agent') {
+      return <span key={index} className="agent-mention recipe">@recipe_agent</span>
+    } else if (part.toLowerCase() === 'mealplan_agent' || part.toLowerCase() === 'meal_plan_agent') {
+      return <span key={index} className="agent-mention mealplan">@mealplan_agent</span>
+    }
+    return part
+  })
+}
+
 function ChatPanel({ inputValue = '', onInputChange, onRecipeGenerated, onMealPlanGenerated }) {
   const [messages, setMessages] = useState([
     { id: 1, role: 'assistant', content: 'Hi! I\'m your AI cooking assistant. Ask me anything about recipes, cooking techniques, ingredient substitutions, or meal planning! Use @recipe_agent to create recipes or @mealplan_agent for meal plans.' }
@@ -191,6 +210,11 @@ function ChatPanel({ inputValue = '', onInputChange, onRecipeGenerated, onMealPl
     }
   }
 
+  // Detect which agent is active
+  const hasRecipeAgent = inputMessage.includes('@recipe_agent')
+  const hasMealPlanAgent = inputMessage.includes('@mealplan_agent')
+  const agentClass = hasRecipeAgent ? 'agent-recipe' : hasMealPlanAgent ? 'agent-mealplan' : ''
+
   return (
     <div className="chat-panel">
       <div className="chat-messages">
@@ -200,7 +224,7 @@ function ChatPanel({ inputValue = '', onInputChange, onRecipeGenerated, onMealPl
               {msg.role === 'assistant' ? '🤖' : '👤'}
             </div>
             <div className="message-content">
-              {msg.content}
+              {renderMessageContent(msg.content)}
             </div>
           </div>
         ))}
@@ -238,7 +262,7 @@ function ChatPanel({ inputValue = '', onInputChange, onRecipeGenerated, onMealPl
           onKeyDown={handleKeyDown}
           onKeyPress={handleKeyPress}
           placeholder="Ask me about cooking, recipes, or ingredients... (type @ to mention an agent)"
-          className="chat-input"
+          className={`chat-input ${agentClass}`}
           rows={2}
           disabled={isLoading}
         />
