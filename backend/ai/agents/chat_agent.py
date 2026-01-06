@@ -59,7 +59,7 @@ class ChatAgent(BaseAgent):
         
         # Create agent with chat-focused system instructions
         agent = self._client.create_agent(
-            id="ChatAgent", 
+            name="ChatAgent", 
             instructions=self.system_instructions,
             tools=[],
         )

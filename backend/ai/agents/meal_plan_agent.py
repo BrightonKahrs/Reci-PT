@@ -136,7 +136,7 @@ class MealPlanAgent(BaseAgent):
 
         # Create agent with static system instructions (reusable)
         agent = self._client.create_agent(
-            id="MealPlanAgent", 
+            name="MealPlanAgent", 
             instructions=self.system_instructions,
             tools=[],
             response_format=MealPlan

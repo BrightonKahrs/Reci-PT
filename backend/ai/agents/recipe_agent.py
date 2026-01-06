@@ -81,7 +81,7 @@ class RecipeAgent(BaseAgent):
 
         # Create agent with static system instructions (reusable)
         agent = self._client.create_agent(
-            id="RecipeAgent", 
+            name="RecipeAgent", 
             instructions=self.system_instructions,
             tools=[],
             response_format=Recipe

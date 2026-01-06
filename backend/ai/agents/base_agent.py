@@ -2,7 +2,7 @@ from typing import Optional
 import logging
 from abc import ABC, abstractmethod
 
-from agent_framework.azure import AzureAIClient
+from agent_framework.azure import AzureAIAgentClient
 from agent_framework import AgentThread
 from azure.identity.aio import DefaultAzureCredential
 
@@ -29,7 +29,7 @@ class BaseAgent(ABC):
         self._endpoint = config.azure_ai_project_endpoint
         self._deployment_name = config.azure_ai_model_deployment_name
         self._credential: Optional[DefaultAzureCredential] = None
-        self._client: Optional[AzureAIClient] = None
+        self._client: Optional[AzureAIAgentClient] = None
         self._thread: Optional[AgentThread] = None
         
         if not self._endpoint:
@@ -41,11 +41,10 @@ class BaseAgent(ABC):
     async def start(self):
         """Initialize async resources. Call on app startup."""
         self._credential = DefaultAzureCredential()
-        self._client = AzureAIClient(
+        self._client = AzureAIAgentClient(
             project_endpoint=self._endpoint,
-            model_deployment_name=self._deployment_name,
             credential=self._credential,
-            agent_name=self._agent_name,
+            model_deployment_name=self._deployment_name
         )
         logger.info(f"{self._agent_name} started")
 
