@@ -1,6 +1,8 @@
 import logging
 import uuid
 
+from agent_framework import ChatAgent
+
 from ai.ai_config import config
 from ai.agents.base_agent import BaseAgent
 from models.meal_plan import MealPlan
@@ -111,6 +113,7 @@ class MealPlanAgent(BaseAgent):
     def __init__(self, state_store: StateStore):
         super().__init__(agent_name="MealPlanAgent", state_store=state_store)
         self.system_instructions = system_instructions
+        self._agent: ChatAgent = None
         
     async def generate_meal_plan(self, user_query: str) -> MealPlan:
         """Generates a meal plan based on the user's natural language query
@@ -135,6 +138,22 @@ class MealPlanAgent(BaseAgent):
         logger.info(f"User message with preferences: {user_message}")
 
         # Create agent with static system instructions (reusable)
+        if not self._agent:
+            self._agent = await self.create_agent()
+
+        if not self._thread:
+            self._thread = self._agent.get_new_thread()
+
+        result = await self._agent.run(user_message, thread=self._thread)
+        meal_plan = MealPlan.model_validate_json(result.text)
+        meal_plan.meal_plan_id = f"meal_plan:{uuid.uuid4().hex[:8]}"
+
+        return meal_plan
+    
+    async def create_agent(self) -> ChatAgent:
+        """Create and configure the MealPlanAgent."""
+        self._ensure_client()
+        
         agent = self._client.create_agent(
             name="MealPlanAgent", 
             instructions=self.system_instructions,
@@ -142,14 +161,7 @@ class MealPlanAgent(BaseAgent):
             response_format=MealPlan
         )
 
-        if not self._thread:
-            self._thread = agent.get_new_thread()
-
-        result = await agent.run(user_message, thread=self._thread)
-        meal_plan = MealPlan.model_validate_json(result.text)
-        meal_plan.meal_plan_id = f"meal_plan:{uuid.uuid4().hex[:8]}"
-
-        return meal_plan
+        return agent
     
     def _build_user_message(self, user_query: str, preferences: str) -> str:
         """Build user message with preferences context"""

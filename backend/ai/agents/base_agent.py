@@ -2,6 +2,7 @@ from typing import Optional
 import logging
 from abc import ABC, abstractmethod
 
+from agent_framework import ChatAgent
 from agent_framework.azure import AzureAIAgentClient
 from agent_framework import AgentThread
 from azure.identity.aio import DefaultAzureCredential
@@ -60,6 +61,11 @@ class BaseAgent(ABC):
         """Ensure client is initialized before use."""
         if not self._client:
             raise RuntimeError(f"{self._agent_name} not started. Call start() first.")
+        
+    @abstractmethod
+    async def create_agent(self) -> ChatAgent:
+        """Abstract method to create and configure the agent."""
+        ... 
     
     async def _load_user_preferences(self) -> str:
         """Load user preferences from state store"""

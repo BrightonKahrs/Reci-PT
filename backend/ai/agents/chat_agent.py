@@ -1,5 +1,7 @@
 import logging
 
+from agent_framework import ChatAgent
+
 from ai.agents.base_agent import BaseAgent
 from state.store import StateStore
 
@@ -35,6 +37,7 @@ class ChatAgent(BaseAgent):
     def __init__(self, state_store: StateStore):
         super().__init__(agent_name="ChatAgent", state_store=state_store)
         self.system_instructions = system_instructions
+        self._agent: ChatAgent = None
         
     async def chat(self, user_message: str) -> str:
         """General chat about cooking, recipes, and ingredients
@@ -57,18 +60,26 @@ class ChatAgent(BaseAgent):
         # Build user message with preferences context
         full_message = self._build_user_message(user_message, preferences)
         
-        # Create agent with chat-focused system instructions
+        if not self._agent:
+            self._agent = await self.create_agent()
+
+        if not self._thread:
+            self._thread = self._agent.get_new_thread()
+
+        result = await self._agent.run(full_message, thread=self._thread)
+        return result.text
+    
+    async def create_agent(self) -> ChatAgent:
+        """Create and configure the MealPlanAgent."""
+        self._ensure_client()
+        
         agent = self._client.create_agent(
             name="ChatAgent", 
             instructions=self.system_instructions,
             tools=[],
         )
 
-        if not self._thread:
-            self._thread = agent.get_new_thread()
-
-        result = await agent.run(full_message, thread=self._thread)
-        return result.text
+        return agent
     
     def _build_user_message(self, user_message: str, preferences: str) -> str:
         """Build user message with preferences context"""
