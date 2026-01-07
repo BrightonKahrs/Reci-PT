@@ -30,6 +30,7 @@ class MealSlot(BaseModel):
     def is_draft(self) -> bool:
         return self.recipe_id is None
 
+
 class MealPlan(BaseModel):
     """Represents a list of recipe plans"""
     model_config = ConfigDict(extra='forbid')
@@ -38,3 +39,11 @@ class MealPlan(BaseModel):
     meal_plan_id: str = Field(..., description="AI generates meal_plan:draft, system overrides with meal_plan:uuid")
     meal_plan_title: str
     recipe_plan: List[MealSlot]
+
+
+class MacroBudgetReview(BaseModel):
+    """Represents a macro and budget review result"""
+    model_config = ConfigDict(extra='forbid')
+
+    review_status: Literal['Passed', 'Failed'] = Field(..., description="Demonstrates whether or not the review passed or failed")
+    adjustments: List[str] = Field(..., description="List of feedback adjustment for budget review")

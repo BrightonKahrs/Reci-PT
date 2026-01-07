@@ -93,7 +93,6 @@ class BaseAgent(ABC):
         
         return '\n'.join(prefs) if prefs else "No dietary restrictions."
 
-    @abstractmethod
     def _build_user_message(self, user_query: str, preferences: str) -> str:
         """Build user message with preferences context.
         
@@ -104,4 +103,4 @@ class BaseAgent(ABC):
         Returns:
             str: Complete user message for the agent
         """
-        ...
+        return ""
