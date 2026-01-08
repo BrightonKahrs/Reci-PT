@@ -36,9 +36,11 @@ system_instructions = f"""
 
     Response:
     {{
+        "meal_plan_id": "meal_plan:draft",
         "meal_plan_title": "Weeknight Dinners + Meal Prep",
         "recipe_plan": [
             {{
+                "recipe_id": "recipe:draft",
                 "meal_day": ["Monday"],
                 "meal_time": ["Dinner"],
                 "title": "Zucchini Noodles with Basil Pesto",
@@ -55,6 +57,7 @@ system_instructions = f"""
                 "complexity": "Easy"
             }},
             {{
+                "recipe_id": "recipe:draft",
                 "meal_day": ["Wednesday"],
                 "meal_time": ["Dinner"],
                 "title": "Quinoa Stuffed Bell Peppers",
@@ -71,6 +74,7 @@ system_instructions = f"""
                 "complexity": "Medium"
             }},
             {{
+                "recipe_id": "recipe:draft",
                 "meal_day": ["Friday"],
                 "meal_time": ["Dinner"],
                 "title": "Mushroom and Spinach Risotto",
@@ -87,6 +91,7 @@ system_instructions = f"""
                 "complexity": "Medium"
             }},
             {{
+                "recipe_id": "recipe:draft",
                 "meal_day": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                 "meal_time": ["Lunch"],
                 "title": "Meal Prep Chicken and Quinoa Bowls",

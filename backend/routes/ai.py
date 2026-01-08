@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import HTTPException, APIRouter, Depends
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
 from ai.agents.chat_agent import ChatAgent
@@ -9,7 +9,7 @@ from ai.agents.recipe_agent import RecipeAgent
 from models.route_endpoints import RecipeInput, RecipeOutput
 from models.meal_plan import MealPlan
 from state.dependencies import get_state_store
-from state.store import StateStore
+from ai.workflows.food_planner_workflow import create_workflow
 
 
 logger = logging.getLogger(__name__)
@@ -59,18 +59,32 @@ async def generate_recipe(request: RecipeInput) -> RecipeOutput:
         raise HTTPException(status_code=500, detail="Failed to generate recipe")
     finally:
         await recipe_agent.stop()
-
-
+    
 @router.post("/generate-meal-plan", response_model=MealPlan)
 async def generate_meal_plan(request: RecipeInput) -> MealPlan:
     """Endpoint to generate a meal plan based on user query"""
 
-    await meal_plan_agent.start()
+    # await meal_plan_agent.start()
+    # try:
+    #     # Agent returns validated Pydantic model directly
+    #     return await meal_plan_agent.generate_meal_plan(user_query=request.query)
+    # except Exception as e:
+    #     logger.error(f"Error generating meal plan: {e}")
+    #     raise HTTPException(status_code=500, detail="Failed to generate meal plan")
+    # finally:
+    #     await meal_plan_agent.stop()
+
+    workflow = await create_workflow()
+    workflow_agent = workflow.as_agent(name="MealPlanWorkflowAgent")
+
     try:
-        # Agent returns validated Pydantic model directly
-        return await meal_plan_agent.generate_meal_plan(user_query=request.query)
+        # Run the workflow
+        result = await workflow_agent.run(request.query)
+        
+        # Extract text from AgentRunResponse and parse to MealPlan
+        meal_plan = MealPlan.model_validate_json(result.text)
+        
+        return meal_plan
     except Exception as e:
         logger.error(f"Error generating meal plan: {e}")
         raise HTTPException(status_code=500, detail="Failed to generate meal plan")
-    finally:
-        await meal_plan_agent.stop()

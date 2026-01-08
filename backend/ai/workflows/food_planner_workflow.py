@@ -1,5 +1,7 @@
 import asyncio
 from typing import  Any
+import uuid
+import logging
 
 from agent_framework import AgentExecutorResponse, WorkflowBuilder, WorkflowContext, executor
 from agent_framework.devui import serve
@@ -7,10 +9,12 @@ from agent_framework.devui import serve
 from ai.agents.recipe_agent import RecipeAgent
 from ai.agents.macro_budget_reviewer_agent import MacroBudgetReviewerAgent
 from ai.agents.meal_plan_agent import MealPlanAgent
-from models.meal_plan import MacroBudgetReview
+from models.meal_plan import MacroBudgetReview, MealPlan
 from state.dependencies import get_state_store
 
 state_store = get_state_store()
+
+logger = logging.getLogger(__name__)
 
 async def get_agents():
 
@@ -36,6 +40,7 @@ async def get_agents():
 
     return agents
 
+# Condition
 def review_failed(message: Any) -> bool:
     """Check if content is approved (high quality)."""
     if not isinstance(message, AgentExecutorResponse):
@@ -51,15 +56,20 @@ async def defined_macros(message: AgentExecutorResponse, ctx: WorkflowContext[st
 
     message = message.agent_run_response.text
 
+    logger.info(f"Given Meal Plan: {message}")
+    current_meal_plan = MealPlan.model_validate_json(message)
+
+    await ctx.set_shared_state("current_meal_plan", current_meal_plan)
+
     await ctx.send_message(f"""
         ## Generated Meal Plan
             {message}
 
         ## USER PROVIDED DAILY TARGETS:
-            - 2000 cal
-            - 150g protein
+            - 2500 cal
+            - 180g protein
             - 200g carbohydrates
-            - 70g fats
+            - 100g fats
         """)
     
 @executor(id="macro_review_feedback")
@@ -74,8 +84,20 @@ async def macro_review_feedback(message: AgentExecutorResponse, ctx: WorkflowCon
         ## Feedback to address
             {message}
         """)
+    
 
-def create_workflow(agents: dict) -> WorkflowBuilder:
+@executor(id="finalize_meal_plan")
+async def finalize_meal_plan(message: AgentExecutorResponse, ctx: WorkflowContext[str]) -> None:
+
+    meal_plan = await ctx.get_shared_state("current_meal_plan")
+    meal_plan = MealPlan.model_validate_json(meal_plan)
+
+    await ctx.send_message(meal_plan.to_json())
+
+
+async def create_workflow() -> WorkflowBuilder:
+
+    agents = await get_agents()
 
     workflow = (
         WorkflowBuilder(name="MealPlanWorkflow", max_iterations=20)
@@ -86,6 +108,9 @@ def create_workflow(agents: dict) -> WorkflowBuilder:
         # Path if review fails
         .add_edge(agents["macro_budget_reviewer_agent"], macro_review_feedback, condition=review_failed)
         .add_edge(macro_review_feedback, agents["meal_plan_agent"])
+
+        # Path if review passes
+        .add_edge(agents["macro_budget_reviewer_agent"], finalize_meal_plan, condition=lambda msg: not review_failed(msg))
 
         .build()
     )
@@ -100,7 +125,7 @@ if __name__ == "__main__":
     meal_plan_agent = agents.get("meal_plan_agent")
     macro_budget_reviewer_agent = agents.get("macro_budget_reviewer_agent")
 
-    workflow = create_workflow(agents)
+    workflow = asyncio.run(create_workflow())
 
     serve(entities=[workflow], auto_open=True)
     # serve(entities=[meal_plan_agent, macro_budget_reviewer_agent], auto_open=True)
